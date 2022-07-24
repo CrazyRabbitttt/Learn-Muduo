@@ -38,8 +38,8 @@ private:
 
   bool started_;              //是否运行
   bool joined_;               //等待线程？
-  pthread_t pthreadId_;       //函数使用
-  pid_t     tid_;             //线程标识
+  pthread_t pthreadId_;       //函数使用,线程的返回值，定位线程
+  pid_t     tid_;             //线程标识, gettid()  Return thread identification ，任何时刻都是全剧唯一
 
   ThreadFunc func_;
   string     name_;
