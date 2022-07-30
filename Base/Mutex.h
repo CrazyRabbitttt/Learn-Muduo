@@ -1,23 +1,16 @@
-#ifndef MUDUO_BASE_MUTEX_H
-#define MUDUO_BASE_MUTEX_H
+#ifndef BING_BASE_MUTEX_H
+#define BING_BASE_MUTEX_H
+#include "Base/nocopyable.h"
 #include <assert.h>
 #include <pthread.h>
-#include "./Nocopyable.h"
 
-namespace Muduo{
-
-class MutexLock : public nocopyable
-{
+namespace bing{
+class MutexLock {
 public:
 
-    MutexLock() : holder_(0)
-    {
-        pthread_mutex_init(&mutex_, NULL);
-    }
 
-    ~MutexLock() {
-        assert(holder_ == 0);
-        pthread_mutex_destroy(&mutex_);
+    MutexLock() {
+        pthread_mutex_init(&mutex_, NULL);
     }
 
     void lock() {
@@ -25,43 +18,39 @@ public:
     }
 
     void unlock() {
-        // holder_ = 0;
         pthread_mutex_unlock(&mutex_);
     }
 
-    //获得RAII维护的内容
-    pthread_mutex_t* getPthreadMutex() {
-        return &mutex_;
+    //RAII有必要提供保护的数据的获取
+    pthread_mutex_t* getPthreadLock() {
+        return &mutex_; 
     }
 
-
 private:
+
+    friend class Condition;
     pthread_mutex_t mutex_;
-    pid_t holder_;
 };
 
 
 
-//RAII, use in stack 
-class MutexLockGuard : public nocopyable
-{
-public:
-    explicit MutexLockGuard(MutexLock& mutex) : mutex_(mutex)
+class MutexLockGuard {
+ public:
+    explicit MutexLockGuard(MutexLock& mutex) : mutex_(mutex) 
     {
-        mutex_.lock();      
-    }
+        mutex_.lock();          //局部变量初始化之后就进行
+    }   
 
     ~MutexLockGuard() {
         mutex_.unlock();
     }
 
-private:
+ private:
     MutexLock& mutex_;
+};  
 
-};
 
+//防止创建了临时对象就锁住了
 #define MutexLockGuard(x) static_assert(false, "missing  mutex guard var name, 只是创建了临时对象");
-
 }
-
 #endif

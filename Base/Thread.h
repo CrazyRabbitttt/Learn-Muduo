@@ -1,59 +1,48 @@
-#ifndef LERRNMUDUO_THREAD_H
-#define LERRNMUDUO_THREAD_H
+#ifndef BING_BASE_THREAD_H
+#define BING_BASE_THREAD_H
 
-#include "./CountDownLatch.h"
-#include "./Types.h"
-#include "./Nocopyable.h"
-#include "Atomic.h"
-#include <iostream>
+#include "Learn-Muduo/Base/nocopyable.h"
+#include "Learn-Muduo/Base/CountDownLatch.h"
+
+
 #include <functional>
-#include <memory>
 #include <pthread.h>
+#include <atomic>
+#include <unistd.h>
+#include <string>
+#include <memory>
 
-namespace Muduo {
+namespace bing {
+class Thread : nocopyable{ 
+ public: 
+    using ThreadFunc = std::function<void()>;
 
-class Thread : nocopyable
-{
-public:
- typedef std::function<void()> ThreadFunc;
+    explicit Thread(ThreadFunc func, const std::string& name = std::string());
 
- explicit Thread(ThreadFunc, const string& name = string());
+    ~Thread();
 
- ~Thread();
-  
- void start();
- int join();        //Return pthread_join
+    void start();
 
- bool started() const { return started_; }
+    void join();
 
- pid_t tid() const { return tid_; }
+    bool isRunning() { return running_; }
 
- const string& name() const { return name_; }
+    pid_t tid() { return tid_ ;}
 
- static int numCreated() { return numCreated_.get(); }
+ private:
+    void setDefaultName();
+    
+    pid_t tid_;              //线程的标识
+    pthread_t pid_;           //进行线程的操作的句柄
+    std::string name_;       //线程的名称
+    ThreadFunc func_;        //线程的执行函数
+    bool running_;         
+    bool joined_;             //主线程等待子线程
+    CountDownLatch latch_;
 
-private:
-
-  void setDefaultName();
-
-  bool started_;              //是否运行
-  bool joined_;               //等待线程？
-  pthread_t pthreadId_;       //函数使用,线程的返回值，定位线程
-  pid_t     tid_;             //线程标识, gettid()  Return thread identification ，任何时刻都是全剧唯一
-
-  ThreadFunc func_;
-  string     name_;
-  CountDownLatch latch_;      //计时器
-
-  //原子性的
-  static AtomicInt32 numCreated_; //线程的序号
-
-};
+    static std::atomic_int32_t numCreated_; // 记录产生线程的个数(静态变量)
+};  
 
 
-
-
-
-}
-
+}   //namespace bing 
 #endif

@@ -1,100 +1,59 @@
-#include "./Thread.h"
+#include "Learn-Muduo/Base/Thread.h"
+#include "Learn-Muduo/Base/CurrentThread.h"
 
+using namespace bing;
 
-#include <type_traits>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/prctl.h>
-#include <syscall.h>
-#include <sys/types.h>
-#include <linux/unistd.h>
+static std::atomic_int32_t numCreated_(0);
 
-
-namespace Muduo {
-
-namespace Detail {
-
-    pid_t gettid() {
-        return static_cast<pid_t>(::syscall(SYS_gettid));           //调用linux的syscall, 
+Thread::Thread(ThreadFunc func, const std::string& name) 
+    : running_(false), joined_(false), pid_(0), tid_(0), func_(std::move(func)), latch_(1), name_(name)
+    {
+        setDefaultName();       //设施默认的名字
     }
 
-    //用于进行初始化线程的工具类？
-    struct ThreadData {
-        typedef Muduo::Thread::ThreadFunc ThreadFunc;
-        ThreadFunc func_;
-        string name_;
-        pid_t* tid_;
-        CountDownLatch* latch_;      
-
-        ThreadData(ThreadFunc func, const string& name, pid_t* tid,
-        CountDownLatch*latch)
-            :func_(std::move(func)), name_(name), tid_(tid), latch_(latch) {}
-
-        void runInThread() {
-
-
-
-
-
-
-            
-        }
-
-    };
-
-    //也就是线程的运行函数，返回的是void*类型
-    void* startThread(void* obj) {
-        ThreadData* data = static_cast<ThreadData*>(obj);
-        data->runInThread();    
-        delete data;
-        return NULL;
+Thread::~Thread() {
+    //线程运行了才进行西沟
+    //joined_是主线程需要等待子线程结束
+    //如果不是的话就是守护线程，detach 
+    //没有等待子线程结束，直接detach自生自灭就好了
+    if (running_ && !joined_) {
+        pthread_detach(pid_);       //直接分离子线程就行了
     }
+}
+
+//等待子线程退出
+void Thread::join() {
+    joined_ = true;
+    pthread_join(pid_, NULL);
+}
 
 
-}  //namespace detail 
+void Thread::start() {
+    assert(!running_);
+    running_ = true;
 
-
-
-    Thread::Thread(ThreadFunc func, const string& n) 
-        :started_(false), joined_(false), pthreadId_(0),
-        tid_(0), func_(std::move(func)),
-        name_(n), latch_(1)
-        {
-            //创建的时候设置名称
-            setDefaultName();
-        }
-
-    Thread::~Thread() {
-        if (started_ && !joined_) {
-            pthread_detach(pthreadId_);         //自动进行分离
-        }
+    if (pthread_create(&pid_, NULL, &func_, NULL)) {
+        //创建失败了 
+    } else {
+        latch_.wait();      //等待计数为0
+        assert(tid_ > 0);
     }
-
-
-    //线程开始的话，就是需要将一些内部的数据传过去，因此再次抽象了一个保存数据的struct 
-    void Thread::start() {
-        assert(!started_);
-        started_ = true;
-
-        Detail::ThreadData* data = new Detail::ThreadData(func_, name_, &tid_, &latch_);
-        if (pthread_create(&pthreadId_, NULL, &Detail::startThread, data)) {
-
-        }
-
-    }
-
-
-
-    //线程根据线程的序号进行设置线程名字
-    void Thread::setDefaultName() {
-        int num = numCreated_.incrementAndGet();
-        if (name_.empty()) {
-            char buf[32];
-            snprintf(buf, sizeof buf, "Thread%d", num);
-            name_ = buf;
-        }
-    }
-
 
 
 }
+
+
+
+void Thread::setDefaultName() {
+    //从线程数目中获得名字
+    int num = ++numCreated_;
+    if (name_.empty()) {
+        char buf[32];
+        snprintf(buf, sizeof buf, "Thread%d", num);
+        name_ = buf;
+    }
+
+}
+
+
+

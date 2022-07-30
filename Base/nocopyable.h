@@ -1,23 +1,17 @@
-#ifndef MUDUO_NOCOPYABLE_H
-#define MUDUO_NOCOPYABLE_H
-
-namespace Muduo
-{
+#ifndef BING_BASE_BOCOPYABLE_H
+#define BING_BASE_BOCOPYABLE_H
 
 
-//继承本类就是不能拷贝的
-class nocopyable
-{
-public:
+class nocopyable {
+ public:
     nocopyable(const nocopyable&) = delete;
     void operator=(const nocopyable&) = delete;
-protected:
+
+
+ protected:
     nocopyable() = default;
     ~nocopyable() = default;
 };
-
-}
-
 
 
 #endif

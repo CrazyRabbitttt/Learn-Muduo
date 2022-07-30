@@ -1,31 +1,33 @@
-#ifndef MUDUO_BASE_COUNTDOWNLATCH_H_
-#define MUDUO_BASE_COUNTDOWNLATCH_H_
+#ifndef BING_BASE_COUNTDOWNLATCH_H
+#define BING_BASE_COUNTDOWNLATCH_H
 
-#include "./Condition.h"
-#include "./Mutex.h"
-#include "./Nocopyable.h"
-namespace Muduo{
+#include "Learn-Muduo/Base/Condition.h"
+#include "Learn-Muduo/Base/Mutex.h"
+#include "Learn-Muduo/Base/nocopyable.h"
 
-class CountDownLatch : nocopyable 
+namespace bing {
+
+
+class CountDownLatch : nocopyable
 {
-public:
-    explicit CountDownLatch(int count);
+ public: 
+    explicit CountDownLatch(int count);     
+    
+    //等待计数器为0
+    void wait();
 
-    void wait();                //等待计时器count == 0
-        
-    void countDown();           //计时器--
+    void countDown();
 
-    int  getCount(); 
+    int getCount() ;
 
-private:
+ private:
     MutexLock mutex_;
     Condition condition_;
-    int count_;
+    int count_;             //计数器
 };
 
-}
 
 
 
-
+}   //namespace bing 
 #endif
