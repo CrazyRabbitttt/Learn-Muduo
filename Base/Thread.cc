@@ -1,15 +1,24 @@
 #include "Learn-Muduo/Base/Thread.h"
 #include "Learn-Muduo/Base/CurrentThread.h"
 
-using namespace bing;
+#include <semaphore.h>
+
+using namespace bing::currentThread;
 
 //静态成员变量在类外初始化
-static std::atomic_int32_t numCreated_(0);
+namespace bing {
+
 
 Thread::Thread(ThreadFunc func, const std::string& name) 
     : running_(false), joined_(false), tid_(0), func_(std::move(func)), latch_(1), name_(name)
     {
+        //默认latch(1), 等待子线程运行
         setDefaultName();       //设施默认的名字
+        printf("Thread class created...\n");
+        printf("111.\n");
+        func_();
+        printf("222.\n");
+ 
     }
 
 Thread::~Thread() {
@@ -20,6 +29,8 @@ Thread::~Thread() {
     if (running_ && !joined_) {
         thread_->detach();          //不用等待子线程结束的话， 直接分离就好了
     }
+
+    printf("Thread class destory...\n");
 }
 
 //等待子线程退出
@@ -37,34 +48,35 @@ void Thread::start() {
         创建线程， thread_指针指向这个线程的对象，
         使用lambda捕获线程对象，访问线程的成员变量
     */
+   
    thread_ = std::shared_ptr<std::thread>(new std::thread([&]() {
         //获得线程的标识符号
         tid_ = currentThread::tid();
 
-        //线程类创建的时候就设定了latch(1)
-        latch_.countDown();
-        
-        //运行函数
         func_();
+        printf("The current thread, tid: %d\n", tid_);
+
+        func_();
+
+        // 线程类创建的时候就设定了latch(1), 减1
+        // latch_.countDown();
+        
    }
     ));
-
-    latch_.wait();
-
+        
+    // latch_.wait();          //等待计数器减少为1就可以结束了，要不然子线程函数没有运行
 }
 
 
 
-void Thread::setDefaultName() {
+void Thread::setDefaultName() { 
     //从线程数目中获得名字
-    int num = ++numCreated_;
     if (name_.empty()) {
-        char buf[32];
-        snprintf(buf, sizeof buf, "Thread%d", num);
+        char buf[32] = {0};
+        snprintf(buf, sizeof buf, "Thread");  
         name_ = buf;
     }
-
 }
 
-
+}  //namespace bing 
 

@@ -14,13 +14,17 @@
 #include <memory>
 
 namespace bing {
+
+
+using ThreadFunc = std::function<void()>;
+
 class Thread : nocopyable{ 
  public: 
-    using ThreadFunc = std::function<void()>;
+    
 
    //  typedef std::function<void ()> ThreadFunc;
 
-    explicit Thread(ThreadFunc func, const std::string& name = std::string());
+    explicit Thread(ThreadFunc func, const std::string& name = std::string()) ;
 
     ~Thread();
 
@@ -31,6 +35,7 @@ class Thread : nocopyable{
     bool isRunning() { return running_; }
 
     pid_t tid() { return tid_ ;}
+
 
  private:
     void setDefaultName();
@@ -50,7 +55,8 @@ class Thread : nocopyable{
 
     CountDownLatch latch_;
 
-    static std::atomic_int32_t numCreated_; // 记录产生线程的个数(静态变量)
+    int nonuse_var;
+
 };  
 
 

@@ -13,6 +13,7 @@ class CountDownLatch : nocopyable
  public: 
     explicit CountDownLatch(int count);     
     
+    ~CountDownLatch() = default;
     //等待计数器为0
     void wait();
 

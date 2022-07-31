@@ -1,7 +1,7 @@
 #ifndef BING_BASE_BOCOPYABLE_H
 #define BING_BASE_BOCOPYABLE_H
 
-
+namespace bing {
 class nocopyable {
  public:
     nocopyable(const nocopyable&) = delete;
@@ -13,5 +13,5 @@ class nocopyable {
     ~nocopyable() = default;
 };
 
-
+}     //namespace bing 
 #endif
