@@ -42,6 +42,10 @@ void EventLoop::loop() {
     looping_ = false;
 }
 
+void EventLoop::updateChannel(Channel* channel) {
+    
+}
+
 
 void EventLoop::abortNotInLoopThread() {
     printf("WARN:abort not in this thread!!!!\n");

@@ -6,6 +6,7 @@
 
 namespace bing {
 
+class Channel;          //前向声明
 
 class EventLoop : nocopyable
 {
@@ -14,6 +15,10 @@ public:
     ~EventLoop();
 
     void loop();
+
+
+    //会进行事件的注册，向poller传递
+    void updateChannel(Channel* channel);
 
     void assertInLoopThread() {
         if (!isInLoopThread()) {
