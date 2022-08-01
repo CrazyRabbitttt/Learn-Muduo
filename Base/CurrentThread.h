@@ -9,7 +9,7 @@
 namespace bing {
   namespace currentThread {
   //thread local 变量, 每个线程都有的全局变量
-  extern thread_local int cachedTid_;
+  extern thread_local int cachedTid_;     //extern, 能够被别的文件引用的线程局部全局变量
 
 
   //获得线程id

@@ -1,7 +1,7 @@
-MAINSOURCE := Test/testThread.cc Test/testLatch.cc
+MAINSOURCE := Test/testThread.cc Test/testLatch.cc Test/testEventLoop1
 
 
-SOURCE := $(wildcard *.cc Base/*.cc Test/*.cc)
+SOURCE := $(wildcard *.cc Base/*.cc Test/*.cc Net/*.cc)
 
 #反过滤，过滤不是main函数的文件
 override SOURCE := $(filter-out $(MAINSOURCE), $(SOURCE))	
@@ -19,8 +19,10 @@ CXXFLAGS := $(CFLAGS)
 
 
 #Test target 
-TARGET1 := ThreadTest 
-TARGET2 := LatchTest
+TARGET1 := ThreadTest 			#线程类的测试
+TARGET2 := LatchTest			#latch同步类的测试
+TARGET3 := EventLoopTest1		#eventloop的测试， version1
+
 
 .PHONY  : objs clean all tests 
 
@@ -36,7 +38,7 @@ $(TARGET2) : $(OBJS) Test/testLatch.o
 	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
 
 
-
-
+$(TARGET3) : $(OBJS) Test/testEventLoop1.o
+	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
 
 

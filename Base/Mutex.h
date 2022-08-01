@@ -1,6 +1,7 @@
 #ifndef BING_BASE_MUTEX_H
 #define BING_BASE_MUTEX_H
 #include "Learn-Muduo/Base/nocopyable.h"
+#include "Learn-Muduo/Base/CurrentThread.h"
 #include <assert.h>
 #include <pthread.h>
 
