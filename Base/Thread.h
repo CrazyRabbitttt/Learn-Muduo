@@ -53,7 +53,7 @@ class Thread : nocopyable{
     std::string name_;                 //线程的名称
     ThreadFunc func_;                  //线程的执行函数
 
-    CountDownLatch latch_;
+   //  CountDownLatch latch_;
 
     int nonuse_var;
 

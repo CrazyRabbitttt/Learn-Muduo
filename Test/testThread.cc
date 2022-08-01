@@ -17,9 +17,4 @@ int main()
     curThread.start();
 
 
-
-
-    
-
-
 }

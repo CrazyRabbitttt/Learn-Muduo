@@ -1,4 +1,4 @@
-MAINSOURCE := Test/testThread.cc
+MAINSOURCE := Test/testThread.cc Test/testLatch.cc
 
 
 SOURCE := $(wildcard *.cc Base/*.cc Test/*.cc)
@@ -20,7 +20,7 @@ CXXFLAGS := $(CFLAGS)
 
 #Test target 
 TARGET1 := ThreadTest 
-
+TARGET2 := LatchTest
 
 .PHONY  : objs clean all tests 
 
@@ -32,7 +32,8 @@ $(TARGET1) : $(OBJS) Test/testThread.o
 	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
 
 
-
+$(TARGET2) : $(OBJS) Test/testLatch.o
+	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
 
 
 

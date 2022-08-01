@@ -10,15 +10,10 @@ namespace bing {
 
 
 Thread::Thread(ThreadFunc func, const std::string& name) 
-    : running_(false), joined_(false), tid_(0), func_(std::move(func)), latch_(1), name_(name)
+    : running_(false), joined_(false), tid_(0), func_(std::move(func)), name_(name)
     {
         //默认latch(1), 等待子线程运行
         setDefaultName();       //设施默认的名字
-        printf("Thread class created...\n");
-        printf("111.\n");
-        func_();
-        printf("222.\n");
- 
     }
 
 Thread::~Thread() {
@@ -29,8 +24,6 @@ Thread::~Thread() {
     if (running_ && !joined_) {
         thread_->detach();          //不用等待子线程结束的话， 直接分离就好了
     }
-
-    printf("Thread class destory...\n");
 }
 
 //等待子线程退出
@@ -44,6 +37,9 @@ void Thread::join() {
 void Thread::start() {
     running_ = true;
 
+    sem_t sem;
+    sem_init(&sem, false, 0);
+
     /*
         创建线程， thread_指针指向这个线程的对象，
         使用lambda捕获线程对象，访问线程的成员变量
@@ -54,16 +50,15 @@ void Thread::start() {
         tid_ = currentThread::tid();
 
         func_();
-        printf("The current thread, tid: %d\n", tid_);
 
-        func_();
-
+        sem_post(&sem);
         // 线程类创建的时候就设定了latch(1), 减1
         // latch_.countDown();
         
    }
     ));
         
+    sem_wait(&sem);             //同步，等待子线程运行函数·
     // latch_.wait();          //等待计数器减少为1就可以结束了，要不然子线程函数没有运行
 }
 
