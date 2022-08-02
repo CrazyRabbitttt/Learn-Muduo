@@ -43,20 +43,20 @@ public:
     //for poller
     int index() { return index_; }
     void set_index(int idx) { index_ = idx; }
-
+    bool isNonEvent() const { return events_ == kNoneEvent; }
 
     EventLoop* ownerLoop() { return loop_; }
 
 
 private:
 
-    void update();
+    void update();          //将Channel绑定的文件描述符同EventLoop中的poll关联
 
     static const int kNoneEvent;
     static const int kReadEvent;
     static const int kWriteEvent;
 
-    EventLoop* loop_;        //属于哪一个EventLoop事件循环
+    EventLoop* loop_;        //属于哪一个EventLoop事件循环, 
     const int fd_;          //Poller 监听的对象
     int events_;            //fd感兴趣的事件， bit pattern 
     int revents_;           //当前的事件
