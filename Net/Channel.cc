@@ -20,6 +20,8 @@ void Channel::update() {
     loop_->updateChannel(this);
 }
 
+Channel::~Channel() {}
+
 
 //根据revent去调用不同的用户回调
 void Channel::handleEvent() {

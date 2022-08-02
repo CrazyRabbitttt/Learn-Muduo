@@ -1,4 +1,4 @@
-MAINSOURCE := Test/testThread.cc Test/testLatch.cc Test/testEventLoop1 Test/testReactor.cc
+MAINSOURCE := Test/testThread.cc Test/testLatch.cc Test/testEventLoop1.cc Test/testReactor.cc
 
 
 SOURCE := $(wildcard *.cc Base/*.cc Test/*.cc Net/*.cc)
