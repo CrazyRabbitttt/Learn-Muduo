@@ -14,12 +14,23 @@ class Poller;
 class EventLoop : nocopyable
 {
 public:
+
+    using Functor = std::function<void()>;
+
     EventLoop();
     ~EventLoop();
-
+    // 执行事件循环
     void loop();
-
+    //退出事件循环
     void quit();
+
+    //当前loop执行回调函数
+    void runInLoop(Functor cb);
+
+    //将回调放入队列，线程被唤醒后执行
+    void queueInLoop(Functor cb);
+
+    void wakeup();
 
     //会进行事件的注册，向poller传递
     void updateChannel(Channel* channel);
@@ -34,12 +45,27 @@ public:
 
 
 private: 
+
+    //wake up, 处理进行唤醒的读事件
+    void handleRead();  
+
+    // 执行回调函数
+    void doPendingFunctors();   
+
     using ChannelList = std::vector<Channel*>;
     void abortNotInLoopThread();        //警告不是在本线程中·
 
+    int wakeupFd_;                      //进行唤醒的事件描述符号
+                                        //当mainLoop获取一个新用户的Channel，通过轮询算法选择一个subLoop，通过该成员变量唤醒subLoop。
+
+    std::atomic_bool callingPengdingChannel_;   //正在唤醒
     bool looping_;
     bool quit_;
 
+
+    std::unique_ptr<Channel> wakeupChannel_;    //标志：当前Loop是否有需要执行的回调操作
+    std::vector<Functor> pendingFunctors_;      //loop需要执行的所有的回调函数
+    MutexLock mutex_;                           //保护vector
     std::unique_ptr<Poller> poller_;        //one loop, one poller 
     ChannelList activeChannels_;
     const pid_t threadId_;          //线程标识
