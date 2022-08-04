@@ -14,7 +14,7 @@ using namespace bing;
 //防止线程创建多个EventLoop
 thread_local EventLoop* t_LoopInThisThread = 0;
 
-const int kPollTimeMs = 10000;
+const int kPollTimeMs = 5000;
 
 
 //创建wakeupfd_,唤醒subReactor处理新的Channel
@@ -57,12 +57,12 @@ EventLoop::~EventLoop() {
 void EventLoop::loop() {
     //
     assert(!looping_);
-
     assertInLoopThread();       //判断下是不是
     looping_ = true;
     quit_ = false;
     //将事件进行调用了
     while (!quit_) {
+        printf("eventloop calling \n");
         activeChannels_.clear();
         poller_->poll(kPollTimeMs, &activeChannels_);       //获得事件的活动列表
         for (ChannelList::iterator it = activeChannels_.begin(); 
@@ -79,21 +79,33 @@ void EventLoop::loop() {
          * mainloop通过eventfd唤醒subloop后，会执行上面的handleEvent，构造函数中将他注册为handleRead，也就是读一个8字节的数据，用来唤醒subloop
          * 然后执行下面的doPendingFunctors()，也就是mainloop事先注册的回调操作cb。
          */
+
         doPendingFunctors();
     }
     printf("EventLoop stop looping..\n");
     looping_ = false;
 }
 
+/*
+退出EventLoop, 
+1如果是在自己的线程中调用quit，直接退出
+2如果在其他线程调用quit，将该loop唤醒，才会结束
+*/
 void EventLoop::quit() {
     quit_ = true;
+    if (!isInLoopThread()) {
+        wakeup();
+    }
 }
 
 //当前Loop进行回调
 void EventLoop::runInLoop(Functor cb) {
+    printf("Runinloop函数调用\n");
     if (isInLoopThread()) {     //当前线程loop,直接执行
+        printf("runinloop直接cb\n");
         cb();   
     } else {
+        printf("放入队列中\n");
         queueInLoop(cb);          //放入队列中， 唤醒loop所在线程，执行callback
     }
 }
@@ -107,7 +119,8 @@ void EventLoop::queueInLoop(Functor cb) {
 
     //唤醒loop线程
     if (!isInLoopThread() || callingPengdingChannel_) {
-        wakeup();
+        printf("放入队列中然后唤醒\n");
+        wakeup();       
     }
 }
 
@@ -134,7 +147,7 @@ void EventLoop::handleRead() {
 //执行回调函数
 void EventLoop::doPendingFunctors() {
     //将vector进行复制到局部变量，减少锁的粒度，快速执行
-
+    printf("do pending func\n");
     std::vector<Functor> localFunctors;
 
     callingPengdingChannel_ = true;     //开始执行回调函数

@@ -1,4 +1,4 @@
-MAINSOURCE := Test/testThread.cc Test/testLatch.cc Test/testEventLoop1.cc Test/testReactor.cc
+MAINSOURCE := Test/testThread.cc Test/testLatch.cc Test/testEventLoop1.cc Test/testReactor.cc Test/testRuninloop.cc
 
 
 SOURCE := $(wildcard *.cc Base/*.cc Test/*.cc Net/*.cc)
@@ -23,10 +23,16 @@ TARGET1 := ThreadTest 			#线程类的测试
 TARGET2 := LatchTest			#latch同步类的测试
 TARGET3 := EventLoopTest1		#eventloop的测试， version1
 TARGET4 := ReactorTest			#Reactor的测试， version1
+TARGET5 := RunInLoopTest		#进行Runinloop的测试，eventloopthread
+
 
 .PHONY  : objs clean all tests 
 
 objs    : $(OBJS)
+clean   : 
+			find ./Base/ -name "*.o" | xargs rm -f
+			find ./Net/ -name "*.o" | xargs rm -f
+			find ./Test/ -name "*.o" | xargs rm -f	
 
 
 
@@ -42,4 +48,7 @@ $(TARGET3) : $(OBJS) Test/testEventLoop1.o
 	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
 
 $(TARGET4) : $(OBJS) Test/testReactor.o
+	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
+
+$(TARGET5) : $(OBJS) Test/testRuninloop.o
 	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
