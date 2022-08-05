@@ -53,11 +53,6 @@ void Thread::start() {
         func_();        
         // sem_post(&sem);
         // 线程类创建的时候就设定了latch(1), 减1
-        // printf("一直被卡住，到达不了这里\n");
-        // latch_->countDown();
-
-        //最后调用函数，要不然需要等函数结束
-
    }
     ));
         

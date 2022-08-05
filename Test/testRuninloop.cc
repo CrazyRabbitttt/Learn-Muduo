@@ -14,8 +14,6 @@ void runInthread() {
 }
 
 
-
-
 int main() {
     printf("main(): pid = %d, tid = %d\n",
          getpid(), bing::currentThread::tid());
