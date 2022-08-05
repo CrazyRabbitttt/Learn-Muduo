@@ -40,7 +40,6 @@ EventLoop* EventLoopThread::startLoop() {
 //线程的实际工作是创建EventLoop，one loop per thread 
 void EventLoopThread::threadFunc() {
 
-    printf("EventLoopThread::threadFunc call\n");
     EventLoop loop;
     {
         MutexLockGuard lock(mutex_);
@@ -53,5 +52,4 @@ void EventLoopThread::threadFunc() {
 
     assert(exiting_);       //走到这里就是循环结束了
     loop_ = NULL;
-
 }

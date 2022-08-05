@@ -15,13 +15,12 @@
 
 namespace bing {
 
-
-using ThreadFunc = std::function<void()>;
+class CountDownLatch;
 
 class Thread : nocopyable{ 
  public: 
-    
 
+   using ThreadFunc = std::function<void()>;
    //  typedef std::function<void ()> ThreadFunc;
 
     explicit Thread(ThreadFunc func, const std::string& name = std::string()) ;
@@ -53,7 +52,7 @@ class Thread : nocopyable{
     std::string name_;                 //线程的名称
     ThreadFunc func_;                  //线程的执行函数
 
-   //  CountDownLatch latch_;
+    CountDownLatch* latch_;
 
     int nonuse_var;
 

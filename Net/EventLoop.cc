@@ -34,6 +34,7 @@ EventLoop::EventLoop()
         wakeupChannel_(new Channel(this, wakeupFd_)), 
         callingPengdingChannel_(false)
 {
+
     if (t_LoopInThisThread) {       //不是0
         printf("WARN:另一个事件循环在本线程中!!!!!\n");
     } else {
@@ -62,7 +63,6 @@ void EventLoop::loop() {
     quit_ = false;
     //将事件进行调用了
     while (!quit_) {
-        printf("eventloop calling \n");
         activeChannels_.clear();
         poller_->poll(kPollTimeMs, &activeChannels_);       //获得事件的活动列表
         for (ChannelList::iterator it = activeChannels_.begin(); 
@@ -82,7 +82,7 @@ void EventLoop::loop() {
 
         doPendingFunctors();
     }
-    printf("EventLoop stop looping..\n");
+    // printf("EventLoop stop looping..\n");
     looping_ = false;
 }
 
@@ -100,12 +100,9 @@ void EventLoop::quit() {
 
 //当前Loop进行回调
 void EventLoop::runInLoop(Functor cb) {
-    printf("Runinloop函数调用\n");
     if (isInLoopThread()) {     //当前线程loop,直接执行
-        printf("runinloop直接cb\n");
         cb();   
     } else {
-        printf("放入队列中\n");
         queueInLoop(cb);          //放入队列中， 唤醒loop所在线程，执行callback
     }
 }
@@ -119,7 +116,6 @@ void EventLoop::queueInLoop(Functor cb) {
 
     //唤醒loop线程
     if (!isInLoopThread() || callingPengdingChannel_) {
-        printf("放入队列中然后唤醒\n");
         wakeup();       
     }
 }
@@ -147,7 +143,6 @@ void EventLoop::handleRead() {
 //执行回调函数
 void EventLoop::doPendingFunctors() {
     //将vector进行复制到局部变量，减少锁的粒度，快速执行
-    printf("do pending func\n");
     std::vector<Functor> localFunctors;
 
     callingPengdingChannel_ = true;     //开始执行回调函数

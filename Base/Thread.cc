@@ -12,6 +12,7 @@ namespace bing {
 Thread::Thread(ThreadFunc func, const std::string& name) 
     : running_(false), joined_(false), tid_(0), func_(std::move(func)), name_(name)
     {
+        latch_ = new CountDownLatch(1);
         //默认latch(1), 等待子线程运行
         setDefaultName();       //设施默认的名字
     }
@@ -37,8 +38,8 @@ void Thread::join() {
 void Thread::start() {
     running_ = true;
 
-    sem_t sem;
-    sem_init(&sem, false, 0);
+    // sem_t sem;
+    // sem_init(&sem, false, 0);
 
     /*
         创建线程， thread_指针指向这个线程的对象，
@@ -48,18 +49,21 @@ void Thread::start() {
    thread_ = std::shared_ptr<std::thread>(new std::thread([&]() {
         //获得线程的标识符号
         tid_ = currentThread::tid();
-
-        func_();
-
-        sem_post(&sem);
+        latch_->countDown();
+        func_();        
+        // sem_post(&sem);
         // 线程类创建的时候就设定了latch(1), 减1
-        // latch_.countDown();
-        
+        // printf("一直被卡住，到达不了这里\n");
+        // latch_->countDown();
+
+        //最后调用函数，要不然需要等函数结束
+
    }
     ));
         
-    sem_wait(&sem);             //同步，等待子线程运行函数·
-    // latch_.wait();          //等待计数器减少为1就可以结束了，要不然子线程函数没有运行
+    // sem_wait(&sem);             //同步，等待子线程运行函数·
+    latch_->wait();          //等待计数器减少为1就可以结束了，要不然子线程函数没有运行
+
 }
 
 

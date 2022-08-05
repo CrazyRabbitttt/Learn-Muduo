@@ -1,35 +1,56 @@
 #include "Learn-Muduo/Net/EventLoop.h"
 #include "Learn-Muduo/Net/EventLoopThread.h"
-
+#include "Learn-Muduo/Base/Thread.h"
 #include <stdio.h>
 
-void runInThread() {
-    printf("runInthread():pid = %d, tid = %d\n", getpid(), bing::currentThread::tid());
+
+void func() {
+    printf("runinThread(): pid = %d, tid = %d\n",
+    getpid(), bing::currentThread::tid());
+}
+
+void runInthread() {
+    func();
 }
 
 
-int main()
-{
-    printf("main(): pid = %d, tid = %d\n", getpid(), bing::currentThread::tid());
 
-    //new thread with one loop 
+
+int main() {
+    printf("main(): pid = %d, tid = %d\n",
+         getpid(), bing::currentThread::tid());
+
     bing::EventLoopThread loopThread;
-
     bing::EventLoop* loop = loopThread.startLoop();
 
-    loop->runInLoop(runInThread);
-    
-    // sleep(1);
+    loop->runInLoop(runInthread);
+    sleep(1);
 
-    // loop->runInLoop(runInThread);
+    loop->runInLoop(runInthread);
 
-    // sleep(2);
+    sleep(2);
 
-    // loop->quit();
+    loop->quit();
 
     printf("exit main\n");
-
 }
+
+
+
+// int main() {
+//     bing::Thread thread(runInthread, "New Thread");
+//     thread.start();
+//     thread.join();
+//     printf("Main: ");
+//     func();
+// }
+
+
+
+
+
+
+
 
 
 
