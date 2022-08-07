@@ -14,15 +14,16 @@ class InetAddress;
     监听， listenfd, 如果有新的用户请求连接
     那么就进行处理
 */
-class Accepter {
+class Accepter : nocopyable{
 public:
     using NewConnectionCallBack = std::function<void(int sockfd, const InetAddress)>;
     
-    Accepter(EventLoop* loop, const InetAddress& listenAddr, bool reuseport);
+    Accepter(EventLoop* loop, const InetAddress& listenAddr, bool reuseport = true);
 
     ~Accepter();
 
     void setNewConnectioncallback(const NewConnectionCallBack& cb) {
+        printf("设置了回调函数\n");
         newConnectioncb_ = cb;
     }
     
@@ -31,9 +32,10 @@ public:
     void listen();
 private:        
 
+    //进行listen到的处理，进行accept
     void handleRead();  
 
-    EventLoop* loop;            //main loop
+    EventLoop* loop_;            //main loop
     Channel acceptChannel_;     
     Socket  acceptSocket_;    
     NewConnectionCallBack newConnectioncb_;     //

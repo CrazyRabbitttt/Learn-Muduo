@@ -7,6 +7,7 @@
 #include <sys/eventfd.h>
 #include <assert.h>
 #include <poll.h>
+#include <vector>
 
 using namespace bing;
 
@@ -51,6 +52,7 @@ EventLoop::EventLoop()
 
 EventLoop::~EventLoop() {
     assert(!looping_);
+    ::close(wakeupFd_);
     t_LoopInThisThread = NULL;  //exit, then let loop to nullptr 
 }
 
@@ -65,9 +67,12 @@ void EventLoop::loop() {
     while (!quit_) {
         activeChannels_.clear();
         poller_->poll(kPollTimeMs, &activeChannels_);       //获得事件的活动列表
+        printf("Now will handle the call back\n");
+        printf("the num of channel: %d\n", activeChannels_.size());
         for (ChannelList::iterator it = activeChannels_.begin(); 
             it != activeChannels_.end(); ++it) 
         {
+            printf("run the handleevent\n");
             (*it)->handleEvent();
         }
 
@@ -79,7 +84,7 @@ void EventLoop::loop() {
          * mainloop通过eventfd唤醒subloop后，会执行上面的handleEvent，构造函数中将他注册为handleRead，也就是读一个8字节的数据，用来唤醒subloop
          * 然后执行下面的doPendingFunctors()，也就是mainloop事先注册的回调操作cb。
          */
-
+        printf("run after do call back\n");
         doPendingFunctors();
     }
     // printf("EventLoop stop looping..\n");

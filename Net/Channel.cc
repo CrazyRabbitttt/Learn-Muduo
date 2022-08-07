@@ -22,9 +22,14 @@ void Channel::update() {
 
 Channel::~Channel() {}
 
+void remove() {
+    
+}
+
 
 //根据revent去调用不同的用户回调
 void Channel::handleEvent() {
+    printf("进行用户的回调\n");
     if (revents_ & POLLNVAL) {
         //todo: LOG_WARN
         printf("Channel::handleEvent, invalid event\n");

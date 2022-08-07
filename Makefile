@@ -1,4 +1,4 @@
-MAINSOURCE := Test/testThread.cc Test/testLatch.cc Test/testEventLoop1.cc Test/testReactor.cc Test/testRuninloop.cc
+MAINSOURCE := Test/testThread.cc Test/testLatch.cc Test/testEventLoop1.cc Test/testReactor.cc Test/testRuninloop.cc Test/testAccept.cc
 
 
 SOURCE := $(wildcard *.cc Base/*.cc Test/*.cc Net/*.cc)
@@ -24,7 +24,7 @@ TARGET2 := LatchTest			#latch同步类的测试
 TARGET3 := EventLoopTest1		#eventloop的测试， version1
 TARGET4 := ReactorTest			#Reactor的测试， version1
 TARGET5 := RunInLoopTest		#进行Runinloop的测试，eventloopthread
-
+TARGET6 := AcceptTest			#进行accpet的简单测试
 
 .PHONY  : objs clean all tests 
 
@@ -52,3 +52,7 @@ $(TARGET4) : $(OBJS) Test/testReactor.o
 
 $(TARGET5) : $(OBJS) Test/testRuninloop.o
 	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
+
+$(TARGET6) : $(OBJS) Test/testAccept.o
+	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
+
