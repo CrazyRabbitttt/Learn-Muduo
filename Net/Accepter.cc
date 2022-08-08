@@ -19,7 +19,7 @@ static int createNonBlockFd() {
 
 Accepter::Accepter(EventLoop* loop, const InetAddress& listenAddr, bool reuseport)
     :loop_(loop), 
-    acceptSocket_(createNonBlockFd()),
+    acceptSocket_(createNonBlockFd()),               //make socket
     acceptChannel_(loop, acceptSocket_.fd()),       //对应的fd是listenfd
     listening_(false)
     {
@@ -30,7 +30,7 @@ Accepter::Accepter(EventLoop* loop, const InetAddress& listenAddr, bool reusepor
 
         acceptSocket_.setReuseAddr(true);
         acceptSocket_.setReusePort(true);
-        acceptSocket_.bindAddr(listenAddr);     //bind
+        acceptSocket_.bindAddr(listenAddr);     //socket bind the addr
 
         //监听socket的回调函数就是handleRead, 加入this就是绑定对象的成员函数
         acceptChannel_.setReadCallBack(std::bind(&Accepter::handleRead, this));
@@ -44,7 +44,7 @@ Accepter::~Accepter() {
 //进行监听
 void Accepter::listen() {
     listening_ = true;
-    acceptSocket_.listen();
+    acceptSocket_.listen();                 //listen
     acceptChannel_.enableReading();     //监听读事件, 跟loop进行了链接了
 }
 

@@ -23,7 +23,6 @@ public:
     ~Accepter();
 
     void setNewConnectioncallback(const NewConnectionCallBack& cb) {
-        printf("设置了回调函数\n");
         newConnectioncb_ = cb;
     }
     

@@ -13,13 +13,16 @@ void NewConnection(int sockfd, const InetAddress& peeraddr) {
 
 int main() {
     printf("main pid = %d\n", getpid());
-    InetAddress localaddr(9981);
+    InetAddress localaddr(9982);
 
     EventLoop loop;
 
+    printf("miaomaio??\n");
     Accepter acctor(&loop, localaddr);
 
     acctor.setNewConnectioncallback(NewConnection);
+
+    printf("call the listen()\n");
 
     acctor.listen(); 
 

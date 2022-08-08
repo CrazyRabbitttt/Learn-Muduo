@@ -38,7 +38,7 @@ public:
     void set_revents(int revt) { revents_ = revt; }     //进行当前事件的设定
 
     //注册读事件, 监听读的事件
-    void enableReading() { printf("监听listen读事件\n"); events_ |= kReadEvent; update(); }
+    void enableReading() { events_ |= kReadEvent; update(); }
 
 
     //关闭所有感兴趣的事件

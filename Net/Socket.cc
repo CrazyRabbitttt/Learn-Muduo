@@ -54,6 +54,7 @@ int Socket::accept(InetAddress* peeraddr) {
     bzero(&addr, len);
 
     // setNoblock();       //将sockfd 设置为 non-block 
+    // int connfd = ::accept(sockfd_, (sockaddr*)&addr, &len);
     int connfd = ::accept4(sockfd_, (sockaddr*)&addr, &len, SOCK_NONBLOCK);
     if (connfd >= 0) {
         peeraddr->setSockAddr(addr);
