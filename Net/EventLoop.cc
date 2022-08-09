@@ -30,7 +30,7 @@ int createEventfd() {
 
 
 EventLoop::EventLoop() 
-    :looping_(false), threadId_(currentThread::tid()), quit_(false), poller_(new Poller(this)) ,
+    :looping_(false), threadId_(currentThread::tid()), quit_(false), poller_(Poller::newDefaultPoller(this)) ,
         wakeupFd_(createEventfd()), 
         wakeupChannel_(new Channel(this, wakeupFd_)), 
         callingPengdingChannel_(false)

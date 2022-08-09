@@ -44,10 +44,14 @@ public:
     //关闭所有感兴趣的事件
     void disableAll() { events_ = kNoneEvent; update(); }
 
-    //for poller
+    //for Poller, 对于
     int index() { return index_; }
     void set_index(int idx) { index_ = idx; }
-    bool isNonEvent() const { return events_ == kNoneEvent; }
+
+    //fd当前的事件状态
+    bool isNonEvent() const { return events_ == kNoneEvent; }       
+    bool isWriting() const { return events_ & kWriteEvent; }
+    bool isReading() const { return events_ & kReadEvent; }
 
     EventLoop* ownerLoop() { return loop_; }
 

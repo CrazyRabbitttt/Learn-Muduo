@@ -13,7 +13,7 @@ class EventLoop;
 class Channel;
 class Socket;
 
-//class 用智能指针进行封装，用于返回this 
+//class 用智能指针进行封装，用于返回this ,唯一进行了enable_shared_from_this 的类（生命期是很模糊的）
 class TcpConnection : nocopyable, public std::enable_shared_from_this<TcpConnection>        
 {
 public: 

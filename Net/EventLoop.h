@@ -34,6 +34,9 @@ public:
 
     //会进行事件的注册，向poller传递
     void updateChannel(Channel* channel);
+    void removeChannel(Channel* channel);
+    bool hasChannel(Channel* channel);
+
 
     void assertInLoopThread() {
         if (!isInLoopThread()) {
