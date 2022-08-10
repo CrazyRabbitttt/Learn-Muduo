@@ -3,6 +3,7 @@
 
 #include "Learn-Muduo/Base/Thread.h"
 #include "Learn-Muduo/Base/CurrentThread.h"
+#include "Learn-Muduo/Base/TimeStamp.h"
 
 #include <vector>
 
@@ -24,15 +25,19 @@ public:
     //退出事件循环
     void quit();
 
+    //返回事件的时候的事件点
+    TimeStamp epollReturnTime() const  { return pollReturnTime_; }
+
     //当前loop执行回调函数
     void runInLoop(Functor cb);
 
     //将回调放入队列，线程被唤醒后执行
     void queueInLoop(Functor cb);
 
+    //进行唤醒，唤醒loop
     void wakeup();
 
-    //会进行事件的注册，向poller传递
+    //会进行事件的注册，向epoller传递
     void updateChannel(Channel* channel);
     void removeChannel(Channel* channel);
     bool hasChannel(Channel* channel);
@@ -65,7 +70,7 @@ private:
     bool looping_;
     bool quit_;
 
-
+    TimeStamp pollReturnTime_;                   //Epoller 返回发生事件的时间点  
     std::unique_ptr<Channel> wakeupChannel_;    //标志：当前Loop是否有需要执行的回调操作
     std::vector<Functor> pendingFunctors_;      //loop需要执行的所有的回调函数
     MutexLock mutex_;                           //保护vector

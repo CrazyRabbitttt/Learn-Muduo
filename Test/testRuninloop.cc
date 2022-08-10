@@ -31,6 +31,11 @@ int main() {
     loop->quit();
 
     printf("exit main\n");
+
+    sleep(1);
+
+    printf("loop still alive?\n");
+
 }
 
 

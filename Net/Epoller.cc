@@ -50,6 +50,7 @@ TimeStamp Epoller::poll(int timeoutMs, ChannelList* activeChannels)
         }
     } else if (numEvents == 0) {
         //do nothing 
+        printf("nothing happend\n");
     } else {
         if (errno != EINTR) {
             printf("EPoller::poll() : epoll_wait error\n");
@@ -73,6 +74,7 @@ void Epoller::fillActiveChannels(int numEvents, ChannelList* activeChannels) con
 // Channel update remove => EvnentLoop updateChannel removeChannel => Poller updateChannel removeChannel
 
 void Epoller::updateChannel(Channel* channel) {
+    printf("到达epoll的注册事件\n");
     const int index = channel->index();
     //进行添加, 添加到epoll中去
     if (index == kNew || index == kDeleted) {
@@ -119,6 +121,7 @@ void Epoller::update(int operation, Channel* channel) {
     //添加或者是修改？ 
 
     int modfd = channel->fd();
+    printf("需要注册的fd:%d\n", modfd);
     //绑定fd 和 fd相关的channel, 事件可读的时候能够拿到channel了
     event.data.fd  = modfd;
     event.data.ptr = channel;
@@ -133,6 +136,7 @@ void Epoller::update(int operation, Channel* channel) {
             printf("epoll_ctl op = add/mod error, fd = %d\n", modfd);
         }
     }
+    printf("注册完成\n");
 }
 
 

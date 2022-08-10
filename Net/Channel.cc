@@ -2,14 +2,14 @@
 #include "Learn-Muduo/Net/EventLoop.h"
 
 #include <sstream>
-#include <poll.h>
+#include <sys/epoll.h>
 
 using namespace bing;
 
 
 const int Channel::kNoneEvent  = 0;
-const int Channel::kReadEvent  = POLLIN | POLLPRI;      //读， 紧急读事件
-const int Channel::kWriteEvent = POLLOUT;
+const int Channel::kReadEvent  = EPOLLIN | EPOLLPRI;
+const int Channel::kWriteEvent = EPOLLOUT;
 
 
 Channel::Channel(EventLoop* loop, int fd)
@@ -22,29 +22,32 @@ void Channel::update() {
 
 Channel::~Channel() {}
 
-void remove() {
-    
+//在所属的EventLoop中将这个Channel删除掉
+void Channel::remove() {
+    loop_->removeChannel(this);
 }
 
 
-//根据revent去调用不同的用户回调
+//根据revent去调用不同的用户回调, 得到Epoller的通知进行处理
 void Channel::handleEvent() {
-    printf("进行用户的回调\n");
-    if (revents_ & POLLNVAL) {
-        //todo: LOG_WARN
-        printf("Channel::handleEvent, invalid event\n");
+    if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN)) {
+        if (closeCallBack_) {
+            closeCallBack_();
+        }
     }
 
-    if (revents_ & (POLLERR | POLLNVAL)) {
-        if (errorEventCallBack_) errorEventCallBack_();
+    //读事件
+    if (revents_ & (EPOLLIN | EPOLLPRI)) {
+        if (readEventCallBack_) {
+            readEventCallBack_();
+        }
     }
-
-    if (revents_ & (POLLIN | POLLPRI | POLLRDHUP)) {
-        if (readEventCallBack_) readEventCallBack_();
-    }
-
-    if (revents_ & POLLOUT) {
-        if (writeEventCallBack_) writeEventCallBack_();
+    
+    //写事件
+    if (revents_ & EPOLLOUT) {
+        if (writeEventCallBack_) {
+            writeEventCallBack_();
+        }
     }
 }
 

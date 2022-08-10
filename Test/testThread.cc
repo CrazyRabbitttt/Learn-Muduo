@@ -18,7 +18,7 @@ int main()
 
     // using ThreadFunc = std::function<void()>;
 
-    ThreadFunc func = []() { printf("The func() is running ...\n");} ;
+    //ThreadFunc func = []() { printf("The func() is running ...\n");} ;
 
     Thread curThread(func1, currentName);
 

@@ -37,7 +37,8 @@ Accepter::Accepter(EventLoop* loop, const InetAddress& listenAddr, bool reusepor
     }
 
 Accepter::~Accepter() {
-
+    acceptChannel_.disableAll();    //什么都不关注了，
+    acceptChannel_.remove();        //从Event中移除
 }
 
 
@@ -45,14 +46,15 @@ Accepter::~Accepter() {
 void Accepter::listen() {
     listening_ = true;
     acceptSocket_.listen();                 //listen
+    printf("will register read\n");
+    printf("监听的描述符号:%d\n", acceptChannel_.fd());
     acceptChannel_.enableReading();     //监听读事件, 跟loop进行了链接了
 }
 
-//监听到了socket的连接了，进行accept
+//监听到了socket的连接了，进行accept 
 void Accepter::handleRead() {
 
     printf("监听到了连接，下面进行处理\n");
-    // sockaddr_in peerAddr;
     InetAddress clientAddr(0);      //默认的使用0
 
     int connfd = acceptSocket_.accept(&clientAddr); //accept后会填充对端的地址

@@ -28,6 +28,7 @@ EventLoopThread::~EventLoopThread() {
 EventLoop* EventLoopThread::startLoop() {
     //启动新的线程，运行threadfunc,创建EventLoop
     thread_.start();
+
     {
         MutexLockGuard lock(mutex_);
         while (loop_ == NULL) cond_.wait();     //等待threadFunc真正跑起来
@@ -41,7 +42,10 @@ EventLoop* EventLoopThread::startLoop() {
 void EventLoopThread::threadFunc() {
 
     EventLoop loop;
-    {
+
+    // if (callback_) callback_(&loop);
+    //修改loop_
+    {   
         MutexLockGuard lock(mutex_);
         loop_ = &loop;
         cond_.notify();         //通知线程， 拿到了loop_
@@ -50,6 +54,7 @@ void EventLoopThread::threadFunc() {
     //loop对象的生命周期是和主函数的周期是相同的
     loop.loop();
 
-    assert(exiting_);       //走到这里就是循环结束了
+    //要是走到这里那就是循环结束了·
+    // MutexLockGuard lock(mutex_);        //访问loop_需要进行加锁·
     loop_ = NULL;
 }

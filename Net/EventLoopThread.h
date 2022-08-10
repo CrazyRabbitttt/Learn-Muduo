@@ -13,7 +13,10 @@ class EventLoop;            //forward declaration
 class EventLoopThread : nocopyable{
 
  public:
-    EventLoopThread();
+    using ThreadInitCallbacl = std::function<void(EventLoop* )>;
+
+   //  EventLoopThread(const ThreadInitCallbacl& cb = ThreadInitCallbacl());
+   EventLoopThread();
     ~EventLoopThread();
 
     EventLoop* startLoop();
@@ -28,6 +31,7 @@ class EventLoopThread : nocopyable{
 
      MutexLock mutex_;   
      Condition cond_;
+   //   ThreadInitCallbacl callback_;
 };
 
 }   //namespace bing

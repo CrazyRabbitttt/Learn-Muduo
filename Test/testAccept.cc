@@ -17,12 +17,9 @@ int main() {
 
     EventLoop loop;
 
-    printf("miaomaio??\n");
     Accepter acctor(&loop, localaddr);
 
     acctor.setNewConnectioncallback(NewConnection);
-
-    printf("call the listen()\n");
 
     acctor.listen(); 
 

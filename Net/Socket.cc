@@ -30,6 +30,7 @@ void Socket::listen() {
     if (::listen(sockfd_, 1024) < 0) {
         printf("listen sockfd faild: %d\n", sockfd_);
     }
+    printf("run after listen\n");
 }
 
 void Socket::bindAddr(const InetAddress& localaddr) {

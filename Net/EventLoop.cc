@@ -15,6 +15,7 @@ using namespace bing;
 //防止线程创建多个EventLoop
 thread_local EventLoop* t_LoopInThisThread = 0;
 
+//默认的IO多路复用的超时时间
 const int kPollTimeMs = 5000;
 
 
@@ -22,11 +23,10 @@ const int kPollTimeMs = 5000;
 int createEventfd() {
     int fd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     if (fd < 0) {
-        printf("eventfd error:%d\n", errno);
+        printf("create eventfd error:%d\n", errno);
     }
     return fd;
 }
-
 
 
 EventLoop::EventLoop() 
@@ -35,44 +35,40 @@ EventLoop::EventLoop()
         wakeupChannel_(new Channel(this, wakeupFd_)), 
         callingPengdingChannel_(false)
 {
-
     if (t_LoopInThisThread) {       //不是0
         printf("WARN:另一个事件循环在本线程中!!!!!\n");
     } else {
         t_LoopInThisThread = this;
     }
 
-    //wakeupChannel_需要注册读的事件, handleRead：进行读的处理
+    //wakeupChannel_需要注册读的事件, handleRead：进行读的处理  
     wakeupChannel_->setReadCallBack(std::bind(&EventLoop::handleRead, this));
     //每个EventLoop监听wakeup的读事件
     wakeupChannel_->enableReading();
 }
 
 
-
 EventLoop::~EventLoop() {
-    assert(!looping_);
+    wakeupChannel_->disableAll();   //不用唤醒了，关闭关注的所有的事件
+    wakeupChannel_->remove();
     ::close(wakeupFd_);
     t_LoopInThisThread = NULL;  //exit, then let loop to nullptr 
 }
 
 
 void EventLoop::loop() {
-    //
-    assert(!looping_);
+
     assertInLoopThread();       //判断下是不是
     looping_ = true;
     quit_ = false;
     //将事件进行调用了
     while (!quit_) {
         activeChannels_.clear();
-        poller_->poll(kPollTimeMs, &activeChannels_);       //获得事件的活动列表
-        printf("Now will handle the call back\n");
-        printf("the num of channel: %d\n", activeChannels_.size());
+        pollReturnTime_ = poller_->poll(kPollTimeMs, &activeChannels_);       //获得事件的活动列表
+        // printf("the num of channel: %d\n", activeChannels_.size());
         for (ChannelList::iterator it = activeChannels_.begin(); 
             it != activeChannels_.end(); ++it) 
         {
-            printf("run the handleevent\n");
             (*it)->handleEvent();
         }
 
@@ -84,7 +80,6 @@ void EventLoop::loop() {
          * mainloop通过eventfd唤醒subloop后，会执行上面的handleEvent，构造函数中将他注册为handleRead，也就是读一个8字节的数据，用来唤醒subloop
          * 然后执行下面的doPendingFunctors()，也就是mainloop事先注册的回调操作cb。
          */
-        printf("run after do call back\n");
         doPendingFunctors();
     }
     // printf("EventLoop stop looping..\n");
@@ -116,10 +111,12 @@ void EventLoop::runInLoop(Functor cb) {
 void EventLoop::queueInLoop(Functor cb) {
     {
         MutexLockGuard lock(mutex_);
-        pendingFunctors_.push_back(cb);
+        // pendingFunctors_.push_back(cb);
+        pendingFunctors_.emplace_back(cb);
     }
 
     //唤醒loop线程
+    //不在当前线程或者是当前线程正在执行回调
     if (!isInLoopThread() || callingPengdingChannel_) {
         wakeup();       
     }
@@ -136,11 +133,13 @@ void EventLoop::wakeup() {
 
 
 //被可读事件唤醒的处理，读取数据，取消掉这个发送的一个int
-void EventLoop::handleRead() {
+void EventLoop::handleRead()
+{
     uint64_t one = 1;
-    int n = read(wakeupFd_, &one, sizeof(one));
-    if (n != sizeof(one)) {
-        printf("EventLoop::handleRead()error\n");
+    ssize_t n = read(wakeupFd_, &one, sizeof(one));
+    if(n != sizeof(one))
+    {
+        printf("EventLoop::handleRead() reads %ld bytes intstead of 8 \n", n);
     }
 }
 
@@ -154,6 +153,7 @@ void EventLoop::doPendingFunctors() {
 
     {
         MutexLockGuard lock(mutex_);
+        //将函数拿到局部变量中并且原来的进行了置空操作
         localFunctors.swap(pendingFunctors_);       //直接拿到局部变量中
     }   
 
@@ -167,6 +167,14 @@ void EventLoop::doPendingFunctors() {
 
 void EventLoop::updateChannel(Channel* channel) {
     poller_->updateChannel(channel);
+}
+
+void EventLoop::removeChannel(Channel* channel) {
+    poller_->removeChannel(channel);
+}
+
+bool EventLoop::hasChannel(Channel* channel) {
+    return poller_->hasChannel(channel);
 }
 
 

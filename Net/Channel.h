@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "Learn-Muduo/Base/nocopyable.h"
-//todo : timestamp.h
+#include "Learn-Muduo/Base/TimeStamp.h"
 
 
 namespace bing {
@@ -23,7 +23,8 @@ class EventLoop;        //前向声明， 只能使用指针对象. 源文件再
 class Channel : nocopyable {
 public:
     using EventCallBack = std::function<void()>;
-    //todo:readEventCallBack
+    using ReadEventCallback = std::function<void(TimeStamp)>;
+
     Channel(EventLoop* loop, int fd);
     ~Channel();
 
@@ -37,14 +38,14 @@ public:
     int events() const { return events_; }
     void set_revents(int revt) { revents_ = revt; }     //进行当前事件的设定
 
-    //注册读事件, 监听读的事件
-    void enableReading() { events_ |= kReadEvent; update(); }
+    //对于关注的事件的处理
+    void enableReading()  { printf("enable read\n"); events_ |= kReadEvent; update();  }
+    void disableReading() { events_ &= ~kReadEvent; update(); }
+    void disableAll()     { events_ = kNoneEvent; update();   }
+    void disableWriting() { events_ &= ~kWriteEvent; update();}
 
 
-    //关闭所有感兴趣的事件
-    void disableAll() { events_ = kNoneEvent; update(); }
-
-    //for Poller, 对于
+    //for Epoller, 目前的状态： added, new,
     int index() { return index_; }
     void set_index(int idx) { index_ = idx; }
 
@@ -69,20 +70,18 @@ private:
     const int fd_;          //Poller 监听的对象
     int events_;            //fd感兴趣的事件， bit pattern 
     int revents_;           //当前的事件
-    int index_;             //used by poller
-
+    int index_;             //used by poller， Epoller中的状态
 
     //事件的回调，不同类型的回调函数
     EventCallBack writeEventCallBack_;
     EventCallBack readEventCallBack_;
     EventCallBack errorEventCallBack_;
-
+    EventCallBack closeCallBack_;
 
 };
 
 
 
 } //namespace bing 
-
 
 #endif
