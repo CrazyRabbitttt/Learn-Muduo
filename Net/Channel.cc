@@ -30,6 +30,7 @@ void Channel::remove() {
 
 //根据revent去调用不同的用户回调, 得到Epoller的通知进行处理
 void Channel::handleEvent() {
+    printf("handle Event\n");
     if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN)) {
         if (closeCallBack_) {
             closeCallBack_();
@@ -38,6 +39,7 @@ void Channel::handleEvent() {
 
     //读事件
     if (revents_ & (EPOLLIN | EPOLLPRI)) {
+        printf("进行可读事件的handle, Channel::handleEvent\n");
         if (readEventCallBack_) {
             readEventCallBack_();
         }

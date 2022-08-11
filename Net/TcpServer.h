@@ -5,23 +5,22 @@
 #include "Learn-Muduo/Net/InetAddress.h"
 
 #include <unordered_map>
-
+#include <atomic>
 namespace bing {
 
 class EventLoop;
 class Accepter;
 
 
-class TcpServer {
- 
+class TcpServer : nocopyable {
  public:
     
     TcpServer(EventLoop* loop, const InetAddress& listenaddr);
     ~TcpServer();
 
-    void setMessageCallback(MessageCallback& cb) { messagecb_ = cb; }
-    void setConnectionCallback(ConnectionCallback& cb) { connectioncb_ = cb; }
-    // void setWriteComCallback(WriteCompleteCallback& cb) { writecompletecb_ = cb; }
+    void setMessageCallback(const MessageCallBack& cb) { messagecb_ = cb; }
+    void setConnectionCallback(const ConnectionCallback& cb) { connectioncb_ = cb; }
+    // void setWriteComCallback(const WriteCompleteCallback& cb) { writecompletecb_ = cb; }
 
 
     void start();           //进行服务端的监听
@@ -33,15 +32,18 @@ class TcpServer {
     //创建新的连接,由Accepter进行回调
     void newConnection(int sockfd, const InetAddress& peeraddr);
     
+    //连接断开了， 需要从connections_中移除掉
+    void removeConnection(const TcpConnectionPtr& conn);
+
     EventLoop* loop_;       //the main loop
     const std::string name_;
-
-    std::unique_ptr<Accepter> accepter_;        //进行连接事件的监听
+    
+    std::unique_ptr<Accepter> accepter_;        //mainloop, 进行连接事件的监听
 
     ConnectionCallback connectioncb_;           //新连接的回调函数
-    MessageCallback messagecb_;                 //读写消息的回调
+    MessageCallBack messagecb_;                 //读写消息的回调
     // WriteCompleteCallback writecompletecb_;     //写成功的回调
-    bool started_;
+    std::atomic_int started_;
     int nextConnfd_;
     ConnectionMap connections_;
 

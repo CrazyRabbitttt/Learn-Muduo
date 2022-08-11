@@ -17,11 +17,12 @@ int main() {
 
     EventLoop loop;
 
-    Accepter acctor(&loop, localaddr);
+    Accepter acctor(&loop, localaddr, true);
 
     acctor.setNewConnectioncallback(NewConnection);
 
     acctor.listen(); 
 
     loop.loop();
+
 }

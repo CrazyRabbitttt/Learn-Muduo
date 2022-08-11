@@ -9,7 +9,7 @@ using namespace bing;
 
 //创建listen socket
 static int createNonBlockFd() {
-    int fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+    int fd = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
     if (fd < 0) {
         printf("create sockfd error\n");
     }
