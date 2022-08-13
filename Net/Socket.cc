@@ -26,16 +26,15 @@ Socket::~Socket() {
 }
 
 void Socket::listen() {
-    printf("开始进行监听\n");
+    printf("监听开始, fd : %d\n", sockfd_);
     if (::listen(sockfd_, 1024) < 0) {
         printf("listen sockfd faild: %d\n", sockfd_);
     }
-    printf("run after listen\n");
 }
 
 void Socket::bindAddr(const InetAddress& localaddr) {
     if (::bind(sockfd_, (sockaddr*)localaddr.getSockAddr(), sizeof (sockaddr_in)) < 0) {
-        printf("bind sockfd error : %d\n", sockfd_);
+        printf("bind sockfd:%d error\n", sockfd_);
     }
 }
 
@@ -49,8 +48,6 @@ void Socket::shutDownWrite() {
 
 int Socket::accept(InetAddress* peeraddr) {
     //进行socket原语的封装  
-    printf("Socket::accept被调用\n");
-    return 22;
     sockaddr_in addr;
     socklen_t len = sizeof addr;
     bzero(&addr, len);
@@ -58,7 +55,6 @@ int Socket::accept(InetAddress* peeraddr) {
     // setNoblock();       //将sockfd 设置为 non-block 
     // int connfd = ::accept(sockfd_, (sockaddr*)&addr, &len);
     int connfd = ::accept4(sockfd_, (sockaddr*)&addr, &len, SOCK_NONBLOCK);
-    printf("卡在accept???\n");
     if (connfd >= 0) {
         printf("accept成功了！不成功怎么ESTABLISH的？？？？\n");
         peeraddr->setSockAddr(addr);

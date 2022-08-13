@@ -17,14 +17,18 @@ class Socket;
 class TcpConnection : nocopyable, public std::enable_shared_from_this<TcpConnection>        
 {
 public: 
+
+    // bing::EventLoop *, const std::__cxx11::string, int, bing::InetAddress, const bing::InetAddress
+
     TcpConnection(EventLoop* loop,
      const std::string name, 
      int sockfd, 
-     InetAddress& localAddr,
-     InetAddress& peerAddr);
+     InetAddress localAddr,
+     InetAddress peerAddr);
 
     ~TcpConnection();
 
+    //return reference by const 
     EventLoop* getLoop() const { return loop_; }
     const std::string& name() const { return name_; }
     const InetAddress& localAddress() const { return localaddr_; }
@@ -40,22 +44,22 @@ public:
     }
 
     //进行连接的建立
-    void connectEstablished();
+    void connectEstablished();                      //只能被调用一次
 
 private:
     enum State{ kConnecting, kConnected, };
 
-    void handleRead();                          //将可读事件传递给客户， MessageCallBack
+    void handleRead();                              // 将可读事件传递给客户， MessageCallBack
     void setStata(State state) { state_ = state; }
-    EventLoop* loop_;                            //sub loop, 进行TcpConnection的处理
+    EventLoop* loop_;                               // sub loop, 进行TcpConnection的处理
 
-    std::string name_;
-    InetAddress localaddr_;                     //本地地址，维护的是connection嘛
-    InetAddress peeraddr_;                      //对端地址
-    std::unique_ptr<Socket> socket_;            //进行连接的socket的维护
+    std::string name_;                              // 连接的名字
+    InetAddress localaddr_;                         // 本地地址，维护的是connection嘛
+    InetAddress peeraddr_;                          // 对端地址
+    std::unique_ptr<Socket> socket_;                // 进行连接的socket的维护
     std::unique_ptr<Channel> channel_;
 
-    std::atomic_int state_;                     //state 
+    std::atomic_int state_;                         // 连接的状态
     ConnectionCallback connectioncb_;
     MessageCallBack messagecb_;
 

@@ -11,13 +11,24 @@ const int Channel::kNoneEvent  = 0;
 const int Channel::kReadEvent  = EPOLLIN | EPOLLPRI;
 const int Channel::kWriteEvent = EPOLLOUT;
 
+Channel::Channel() {}
 
 Channel::Channel(EventLoop* loop, int fd)
     : loop_(loop), fd_(fd), events_(0), revents_(0), index_(-1)
-    {}
+    {
+        printf("传进Channel的fd: %d\n", fd);
+    }
 
 void Channel::update() {
     loop_->updateChannel(this);
+}
+
+void Channel::Init(EventLoop* loop, int fd) {
+    this->loop_ = loop;
+    this->fd_ = fd;
+    this->events_ = 0;
+    this->revents_ = 0;
+    this->index_ = -1;
 }
 
 Channel::~Channel() {}
@@ -30,7 +41,6 @@ void Channel::remove() {
 
 //根据revent去调用不同的用户回调, 得到Epoller的通知进行处理
 void Channel::handleEvent() {
-    printf("handle Event\n");
     if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN)) {
         if (closeCallBack_) {
             closeCallBack_();
@@ -39,7 +49,6 @@ void Channel::handleEvent() {
 
     //读事件
     if (revents_ & (EPOLLIN | EPOLLPRI)) {
-        printf("进行可读事件的handle, Channel::handleEvent\n");
         if (readEventCallBack_) {
             readEventCallBack_();
         }

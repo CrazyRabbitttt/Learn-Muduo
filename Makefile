@@ -1,4 +1,4 @@
-MAINSOURCE := Test/testThread.cc Test/testLatch.cc Test/testEventLoop1.cc Test/testReactor.cc Test/testRuninloop.cc Test/testAccept.cc
+MAINSOURCE := Test/testThread.cc Test/testLatch.cc Test/testEventLoop1.cc Test/testReactor.cc Test/testRuninloop.cc Test/testAccept.cc Test/testServer.cc
 
 
 SOURCE := $(wildcard *.cc Base/*.cc Test/*.cc Net/*.cc)
@@ -25,6 +25,8 @@ TARGET3 := EventLoopTest1		#eventloop的测试， version1
 TARGET4 := ReactorTest			#Reactor的测试， version1
 TARGET5 := RunInLoopTest		#进行Runinloop的测试，eventloopthread
 TARGET6 := AcceptTest			#进行accpet的简单测试
+TARGET7 := ServerTest			#进行Server的简单的测试
+
 
 .PHONY  : objs clean all tests 
 
@@ -56,3 +58,5 @@ $(TARGET5) : $(OBJS) Test/testRuninloop.o
 $(TARGET6) : $(OBJS) Test/testAccept.o
 	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
 
+$(TARGET7) : $(OBJS) Test/testServer.o
+	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)

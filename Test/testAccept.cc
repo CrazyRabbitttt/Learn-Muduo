@@ -17,12 +17,12 @@ int main() {
 
     EventLoop loop;
 
-    Accepter acctor(&loop, localaddr, true);
+    Accepter acctor(&loop, localaddr);
+    
+    acctor.setNewConnectioncallback(NewConnection);     //listen socket读事件触发后进行accept + 执行这个用户指定的回调函数
 
-    acctor.setNewConnectioncallback(NewConnection);
+    acctor.listen();                                    //listen, 往epoll注册读事件
 
-    acctor.listen(); 
-
-    loop.loop();
+    loop.loop();                                        //loop
 
 }

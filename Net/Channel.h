@@ -25,7 +25,9 @@ public:
     using EventCallBack = std::function<void()>;
     using ReadEventCallback = std::function<void(TimeStamp)>;
 
+    Channel();
     Channel(EventLoop* loop, int fd);
+    void Init(EventLoop* loop, int fd);
     ~Channel();
 
     void handleEvent();         //进行事件的处理
@@ -39,7 +41,7 @@ public:
     void set_revents(int revt) { revents_ = revt; }     //进行当前事件的设定
 
     //对于关注的事件的处理
-    void enableReading()  { printf("enable read\n"); events_ |= kReadEvent; update();  }
+    void enableReading()  { printf("enablereading fd: %d\n", fd_); events_ |= kReadEvent; update();  }
     void disableReading() { events_ &= ~kReadEvent; update(); }
     void disableAll()     { events_ = kNoneEvent; update();   }
     void disableWriting() { events_ &= ~kWriteEvent; update();}
@@ -67,7 +69,7 @@ private:
     static const int kWriteEvent;
 
     EventLoop* loop_;        //属于哪一个EventLoop事件循环, 
-    const int fd_;          //Poller 监听的对象
+    int fd_;          //Poller 监听的对象
     int events_;            //fd感兴趣的事件， bit pattern 
     int revents_;           //当前的事件
     int index_;             //used by poller， Epoller中的状态

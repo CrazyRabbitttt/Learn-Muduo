@@ -29,10 +29,10 @@ public:
     TimeStamp epollReturnTime() const  { return pollReturnTime_; }
 
     //当前loop执行回调函数
-    void runInLoop(Functor cb);
+    void runInLoop(const Functor& cb);
 
     //将回调放入队列，线程被唤醒后执行
-    void queueInLoop(Functor cb);
+    void queueInLoop(const Functor& cb);
 
     //进行唤醒，唤醒loop
     void wakeup();

@@ -4,9 +4,14 @@
 #include <memory>
 #include <functional>
 
+
+namespace bing {
+
 class TcpConnection;
-class Buffer;
 class Timestamp;    
+// class Buffer;
+
+
 
 using TimerCallback = std::function<void()>;
 using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
@@ -16,6 +21,6 @@ using CloseCallback = std::function<void(const TcpConnectionPtr&)>;
 // using MessageCallback = std::function<void(const TcpConnectionPtr& conn, Buffer* buffer, Timestamp receiveTime)>;
 using MessageCallBack = std::function<void(const TcpConnectionPtr&, const char* data, ssize_t len)>;
 
-
+}
 
 #endif

@@ -22,6 +22,7 @@ public:
 
     ~Accepter();
 
+    //接受到新用户连接的回调
     void setNewConnectioncallback(const NewConnectionCallBack& cb) {
         newConnectioncb_ = cb;
     }

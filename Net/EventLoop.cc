@@ -100,7 +100,7 @@ void EventLoop::quit() {
 }
 
 //当前Loop进行回调
-void EventLoop::runInLoop(Functor cb) {
+void EventLoop::runInLoop(const Functor& cb) {
     if (isInLoopThread()) {     //当前线程loop,直接执行
         cb();   
     } else {
@@ -109,7 +109,7 @@ void EventLoop::runInLoop(Functor cb) {
 }
 
 //将callback函数放入队列中，唤醒线程
-void EventLoop::queueInLoop(Functor cb) {
+void EventLoop::queueInLoop(const Functor& cb) {
     {
         MutexLockGuard lock(mutex_);
         // pendingFunctors_.push_back(cb);
@@ -126,7 +126,7 @@ void EventLoop::queueInLoop(Functor cb) {
 //唤醒线程，需要往线程发送数据，致使可读事件被调用
 void EventLoop::wakeup() {
     uint64_t one = 1;
-    ssize_t n = write(wakeupFd_, &one, sizeof(one));
+    ssize_t n = ::write(wakeupFd_, &one, sizeof(one));
     if (n != sizeof(one)) {
         printf("EventLoop::wakeup() error, write %lu bytes\n", n);
     }
@@ -137,7 +137,7 @@ void EventLoop::wakeup() {
 void EventLoop::handleRead()
 {
     uint64_t one = 1;
-    ssize_t n = read(wakeupFd_, &one, sizeof(one));
+    ssize_t n = ::read(wakeupFd_, &one, sizeof(one));
     if(n != sizeof(one))
     {
         printf("EventLoop::handleRead() reads %ld bytes intstead of 8 \n", n);
