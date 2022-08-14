@@ -15,15 +15,14 @@ class Accepter;
 class TcpServer : nocopyable {
  public:
     
-    TcpServer(EventLoop* loop, const InetAddress& listenaddr);
+    TcpServer(EventLoop* loop, const InetAddress& listenaddr, const std::string& nameArg);
     ~TcpServer();
 
-    void setMessageCallback(const MessageCallBack& cb) { messagecb_ = cb; }
+    void setMessageCallback(const MessageCallback& cb) { messagecb_ = cb; }
     void setConnectionCallback(const ConnectionCallback& cb) { connectioncb_ = cb; }
     // void setWriteComCallback(const WriteCompleteCallback& cb) { writecompletecb_ = cb; }
 
-
-    void start();           //进行服务端的监听
+    void start();           //开启服务端的监听
 
  private:
 
@@ -35,13 +34,14 @@ class TcpServer : nocopyable {
     //连接断开了， 需要从connections_中移除掉
     void removeConnection(const TcpConnectionPtr& conn);
 
-    EventLoop* loop_;                           //the main loop
-    const std::string name_;
-    
+    EventLoop* loop_;                           // the main loop
+    const std::string name_;                    // 服务器的名称
+    const std::string ipPort_;                  // 服务器的端口号
+
     std::unique_ptr<Accepter> accepter_;        //mainloop, 进行连接事件的监听
 
     ConnectionCallback connectioncb_;           //新连接的回调函数
-    MessageCallBack messagecb_;                 //读写消息的回调
+    MessageCallback messagecb_;                 //读写消息的回调
     // WriteCompleteCallback writecompletecb_;     //写成功的回调
     std::atomic_int started_;
     int nextConnId_;

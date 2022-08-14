@@ -12,9 +12,7 @@ class InetAddress;
 class Socket {
 public:
     explicit Socket(int sockfd)
-        :sockfd_(sockfd) {
-            printf("Socket::sockfd: %d\n", sockfd_);
-        }
+        :sockfd_(sockfd) {}
     
     ~Socket();
 

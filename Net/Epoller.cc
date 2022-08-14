@@ -40,7 +40,7 @@ TimeStamp Epoller::poll(int timeoutMs, ChannelList* activeChannels)
     TimeStamp now(TimeStamp::now());
     if (numEvents > 0) {
         //TODO: log 
-        printf("%d nums events happend\n", numEvents);
+        // printf("%d nums events happend\n", numEvents);
         //将发生的事件填充进activeChannel中去
         fillActiveChannels(numEvents, activeChannels);
 

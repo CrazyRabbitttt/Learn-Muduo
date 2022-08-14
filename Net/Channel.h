@@ -30,18 +30,19 @@ public:
     void Init(EventLoop* loop, int fd);
     ~Channel();
 
-    void handleEvent();         //进行事件的处理
+    void handleEvent(TimeStamp receiveTime);         //进行事件的处理
 
-    void setReadCallBack(const EventCallBack& cb) { readEventCallBack_  = std::move(cb); }
-    void setWriteCallBack(const EventCallBack&cb) { writeEventCallBack_ = std::move(cb); }
-    void setErrorCallBack(const EventCallBack&cb) { errorEventCallBack_ = std::move(cb); }
-    
+    void setReadCallBack(ReadEventCallback cb) { readEventCallBack_  = std::move(cb); }
+    void setWriteCallBack(EventCallBack cb) { writeEventCallBack_ = std::move(cb); }
+    void setErrorCallBack(EventCallBack cb) { errorEventCallBack_ = std::move(cb); }
+    void setCloseCallBack(EventCallBack cb) { closeEventCallBack_ = std::move(cb); }
+
     int fd() const { return fd_; }
     int events() const { return events_; }
     void set_revents(int revt) { revents_ = revt; }     //进行当前事件的设定
 
     //对于关注的事件的处理
-    void enableReading()  { printf("enablereading fd: %d\n", fd_); events_ |= kReadEvent; update();  }
+    void enableReading()  { events_ |= kReadEvent; update();  }
     void disableReading() { events_ &= ~kReadEvent; update(); }
     void disableAll()     { events_ = kNoneEvent; update();   }
     void disableWriting() { events_ &= ~kWriteEvent; update();}
@@ -76,9 +77,9 @@ private:
 
     //事件的回调，不同类型的回调函数
     EventCallBack writeEventCallBack_;
-    EventCallBack readEventCallBack_;
+    ReadEventCallback readEventCallBack_;
     EventCallBack errorEventCallBack_;
-    EventCallBack closeCallBack_;
+    EventCallBack closeEventCallBack_;
 
 };
 

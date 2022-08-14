@@ -11,7 +11,6 @@ using namespace bing;
 //创建listen socket
 static int createNonBlockFd() {
     int fd = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
-    printf("create sockfd : %d\n", fd);
     if (fd < 0) {
         printf("create sockfd error\n");
     }
@@ -26,7 +25,6 @@ Accepter::Accepter(EventLoop* loop, const InetAddress& listenAddr, bool reusepor
     listening_(false)
     {
         acceptChannel_.Init(loop, acceptSocket_.fd());      //放弃构造，使用init函数传递fd
-        printf("acceptChannel fd: %d\n", acceptChannel_.fd());
         /*
             Accept进行连接的监听，如果有新用户进行了连接，进行用户
             的回调。将connfd封装成Channel，唤醒subLoop进行处理
@@ -48,10 +46,8 @@ Accepter::~Accepter() {
 
 //进行监听
 void Accepter::listen() {
-    printf("Listen::  sockfd:%d, channelfd:%d\n", acceptSocket_.fd(), acceptChannel_.fd());
     listening_ = true;
     acceptSocket_.listen();                 //listen
-    printf("开始要注册listendfd : %d\n", acceptChannel_.fd());
     acceptChannel_.enableReading();     //监听读事件, 跟loop进行了链接了
 }
 
@@ -65,8 +61,6 @@ void Accepter::handleRead() {
     
     if (connfd >= 0) {      //连接创建成功了
         //用户的回调函数
-        printf("连接创建成功，进行回调函数\n");
-        ::write(connfd, "How are mee?\n", 13);
         if (newConnectioncb_) {
             newConnectioncb_(connfd, clientAddr);
         } else {

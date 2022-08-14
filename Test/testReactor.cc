@@ -1,20 +1,24 @@
 #include "Learn-Muduo/Net/Channel.h"
 #include "Learn-Muduo/Net/EventLoop.h"
-
+#include "Learn-Muduo/Base/TimeStamp.h"
 #include <stdio.h>
 #include <sys/timerfd.h>
 #include <string.h>
 
 bing::EventLoop* G_loop;
 
-void timeout() {
-    printf("Timeout !\n");
+using namespace bing;
+
+void timeout(TimeStamp receiveTime) {
+    printf("%s Timeout !\n", receiveTime.toString().c_str());
     G_loop->quit();
 }
 
 
 int main()
 {
+
+    printf("%s started\n", TimeStamp::now().toString().c_str());
     bing::EventLoop loop;
     G_loop = &loop;
 

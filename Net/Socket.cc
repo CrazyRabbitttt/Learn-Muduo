@@ -26,7 +26,6 @@ Socket::~Socket() {
 }
 
 void Socket::listen() {
-    printf("监听开始, fd : %d\n", sockfd_);
     if (::listen(sockfd_, 1024) < 0) {
         printf("listen sockfd faild: %d\n", sockfd_);
     }
@@ -56,7 +55,7 @@ int Socket::accept(InetAddress* peeraddr) {
     // int connfd = ::accept(sockfd_, (sockaddr*)&addr, &len);
     int connfd = ::accept4(sockfd_, (sockaddr*)&addr, &len, SOCK_NONBLOCK);
     if (connfd >= 0) {
-        printf("accept成功了！不成功怎么ESTABLISH的？？？？\n");
+        // printf("accept成功了！不成功怎么ESTABLISH的？？？？\n");
         peeraddr->setSockAddr(addr);
     }
     return connfd;

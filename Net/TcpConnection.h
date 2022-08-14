@@ -4,6 +4,7 @@
 #include "Learn-Muduo/Net/InetAddress.h"
 #include "Learn-Muduo/Net/Callback.h"
 #include "Learn-Muduo/Base/nocopyable.h"
+#include "Learn-Muduo/Net/Buffer.h"
 #include <memory>
 #include <atomic>
 
@@ -23,8 +24,8 @@ public:
     TcpConnection(EventLoop* loop,
      const std::string name, 
      int sockfd, 
-     InetAddress localAddr,
-     InetAddress peerAddr);
+     const InetAddress& localAddr,
+     const InetAddress& peerAddr);
 
     ~TcpConnection();
 
@@ -35,21 +36,24 @@ public:
     const InetAddress& peerAddress() const { return peeraddr_; }
     bool connected() const { return state_ == kConnected; }
 
-    void setConnectionCallBack(const ConnectionCallback& cb) {
-        connectioncb_ = cb;
-    }
+    void setConnectionCallBack(const ConnectionCallback& cb) { connectioncb_ = cb; }
+    void setMessageCallBack(const MessageCallback& cb) { messagecb_ = cb; }
+    void setCloseCallBack(const CloseCallback& cb) { closecb_ = cb; }
 
-    void setMessageCallBack(const MessageCallBack& cb) {
-        messagecb_ = cb;
-    }
-
-    //进行连接的建立
+    // 进行连接的建立
     void connectEstablished();                      //只能被调用一次
+    // 进行连接的销毁
+    void connectDestoryed();
 
 private:
-    enum State{ kConnecting, kConnected, };
+    enum State{ kConnecting, kConnected, kdisConnected, };
 
-    void handleRead();                              // 将可读事件传递给客户， MessageCallBack
+    void handleRead(TimeStamp receiveTime);                              // 将可读事件传递给客户， MessageCallBack
+    void handleWrite();
+    void handleError();
+    void handleClose();
+
+
     void setStata(State state) { state_ = state; }
     EventLoop* loop_;                               // sub loop, 进行TcpConnection的处理
 
@@ -61,8 +65,12 @@ private:
 
     std::atomic_int state_;                         // 连接的状态
     ConnectionCallback connectioncb_;
-    MessageCallBack messagecb_;
+    MessageCallback messagecb_;
+    CloseCallback closecb_; 
 
+
+    Buffer inputBuffer_;                            // 接受数据的缓冲区，内部从tcp读完写到这里
+    Buffer outputBuffer_;                           // 发送数据的缓冲区, 写到这里然后内部发送
 };
 
 }   //namespace bing 

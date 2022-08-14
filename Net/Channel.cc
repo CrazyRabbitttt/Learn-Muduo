@@ -15,9 +15,7 @@ Channel::Channel() {}
 
 Channel::Channel(EventLoop* loop, int fd)
     : loop_(loop), fd_(fd), events_(0), revents_(0), index_(-1)
-    {
-        printf("传进Channel的fd: %d\n", fd);
-    }
+    {}
 
 void Channel::update() {
     loop_->updateChannel(this);
@@ -40,17 +38,17 @@ void Channel::remove() {
 
 
 //根据revent去调用不同的用户回调, 得到Epoller的通知进行处理
-void Channel::handleEvent() {
+void Channel::handleEvent(TimeStamp receiveTime) {      // 得到的是poll的return time 
     if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN)) {
-        if (closeCallBack_) {
-            closeCallBack_();
+        if (closeEventCallBack_) {
+            closeEventCallBack_();
         }
     }
 
     //读事件
     if (revents_ & (EPOLLIN | EPOLLPRI)) {
         if (readEventCallBack_) {
-            readEventCallBack_();
+            readEventCallBack_(receiveTime);
         }
     }
     

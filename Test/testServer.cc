@@ -17,9 +17,11 @@ void onConnection(const TcpConnectionPtr& conn) {
 }
 
 
-void onMessage(const TcpConnectionPtr& conn, const char* data, ssize_t len){
-    printf("onMessage() : reveived %zd bytes from connection [%s]\n",
-        len, conn->name().c_str());
+void onMessage(const TcpConnectionPtr& conn, Buffer* buffer, TimeStamp receiveTime){
+    printf("onMessage() : reveived %zd bytes from connection [%s] at %s\n",
+        buffer->readableBytes(), conn->name().c_str(), receiveTime.toString());
+
+    printf("onMessage(): [%s]\n", buffer->retrieveAllAsString());
 }
 
 
@@ -28,8 +30,9 @@ int main() {
     printf("Main(): pid = %d\n", getpid());
 
     const InetAddress listenAddr(9981);
-    EventLoop loop;                         
-    TcpServer server(&loop, listenAddr);
+    EventLoop loop;                     
+    std::string name = "TestServer";    
+    TcpServer server(&loop, listenAddr, name);
     server.setConnectionCallback(onConnection);
     server.setMessageCallback(onMessage);
     server.start();
