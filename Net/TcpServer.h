@@ -20,7 +20,7 @@ class TcpServer : nocopyable {
 
     void setMessageCallback(const MessageCallback& cb) { messagecb_ = cb; }
     void setConnectionCallback(const ConnectionCallback& cb) { connectioncb_ = cb; }
-    // void setWriteComCallback(const WriteCompleteCallback& cb) { writecompletecb_ = cb; }
+    void setWriteComCallback(const WriteCompleteCallback& cb) { writecompletecb_ = cb; }
 
     void start();           //开启服务端的监听
 
@@ -42,7 +42,7 @@ class TcpServer : nocopyable {
 
     ConnectionCallback connectioncb_;           //新连接的回调函数
     MessageCallback messagecb_;                 //读写消息的回调
-    // WriteCompleteCallback writecompletecb_;     //写成功的回调
+    WriteCompleteCallback writecompletecb_;     //写成功的回调
     std::atomic_int started_;
     int nextConnId_;
     ConnectionMap connections_;

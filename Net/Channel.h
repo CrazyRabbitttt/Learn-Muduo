@@ -46,6 +46,7 @@ public:
     void disableReading() { events_ &= ~kReadEvent; update(); }
     void disableAll()     { events_ = kNoneEvent; update();   }
     void disableWriting() { events_ &= ~kWriteEvent; update();}
+    void enableWriting()  { events_ |= kWriteEvent; update(); }
 
 
     //for Epoller, 目前的状态： added, new,

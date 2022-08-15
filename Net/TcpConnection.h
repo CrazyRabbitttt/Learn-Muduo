@@ -36,6 +36,13 @@ public:
     const InetAddress& peerAddress() const { return peeraddr_; }
     bool connected() const { return state_ == kConnected; }
 
+    // 发送数据
+    void send(const std::string& buf);
+
+    // 关闭连接
+    void shutdown();
+
+
     void setConnectionCallBack(const ConnectionCallback& cb) { connectioncb_ = cb; }
     void setMessageCallBack(const MessageCallback& cb) { messagecb_ = cb; }
     void setCloseCallBack(const CloseCallback& cb) { closecb_ = cb; }
@@ -46,7 +53,7 @@ public:
     void connectDestoryed();
 
 private:
-    enum State{ kConnecting, kConnected, kdisConnected, };
+    enum State{ kConnecting, kConnected, kdisConnected, kDisConnecting, };
 
     void handleRead(TimeStamp receiveTime);                              // 将可读事件传递给客户， MessageCallBack
     void handleWrite();
@@ -54,7 +61,10 @@ private:
     void handleClose();
 
 
-    void setStata(State state) { state_ = state; }
+    void sendInloop(const void* data, size_t len);
+    void shutdownInloop();
+
+    void setState(State state) { state_ = state; }
     EventLoop* loop_;                               // sub loop, 进行TcpConnection的处理
 
     std::string name_;                              // 连接的名字
@@ -67,6 +77,7 @@ private:
     ConnectionCallback connectioncb_;
     MessageCallback messagecb_;
     CloseCallback closecb_; 
+    WriteCompleteCallback writeCompeletecb_;        
 
 
     Buffer inputBuffer_;                            // 接受数据的缓冲区，内部从tcp读完写到这里

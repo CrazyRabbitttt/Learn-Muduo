@@ -18,7 +18,7 @@ ssize_t Buffer::readFd(int fd, int* saveErrno) {
     struct iovec vec[2];
     size_t writeable = writeableBytes();
     // 1. 缓冲区一、首先第一部分是要写到buf中
-    vec[0].iov_base = begin() + writeIdx_;
+    vec[0].iov_base = begin() + writeIdx_;      //放到可读的部分上面
     vec[0].iov_len  = writeable;
 
     // 2. 缓冲区二、如果说buffer中的位置是不够的，暂时使用栈空间的，最多128K
