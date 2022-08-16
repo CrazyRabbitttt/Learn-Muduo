@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <iostream>
 
 /*
             缓冲区的模型：
@@ -68,13 +69,13 @@ namespace bing {
         } 
 
         //读了len之后对指针进行移动
-        void retrieve(size_t len) {
+        void retrieve(size_t len) {  
             if (len < readableBytes()) {            // 没读完，移动readIdx_
                 readIdx_ += len;        
             } else {                                // 全部都读完了
                 retrieveAll();                      // 将指针复位到原来的位置
             }
-        }
+        } 
 
         // 将指针复位到原来的位置可读的区域是0
         void retrieveAll() {

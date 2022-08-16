@@ -82,8 +82,6 @@ void TcpConnection::send(const std::string& message) {
     if (state_ == kConnected) {
         // 是否是在当前的线程
         if (loop_->isInLoopThread()) {
-            printf("直接本线程发送\n");
-            printf("传给SendInloop的参数:%s\n", message.c_str());
             sendInloop(message.c_str(), message.size());
         } else {        //不是的话，转到loop_所在的线程进行发送
             printf("转到IO线程去执行\n");
@@ -111,14 +109,11 @@ void TcpConnection::sendInloop(const void* data, size_t len) {
         printf("TcpConnection::sendinloop, can not write, connection is done!\n");
         return;
     }
-    printf("SendInloop传过来的参数: %s\n", (char*)data);
     // channel_第一次写数据(epoll没关注写时间)，缓冲区不能有待发送的数据
     if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0) {
-        printf("开始运行发送数据了, [%s]\n", (char*)data);
         nwrite = ::write(channel_->fd(), data, len);
         if (nwrite >= 0) {       
             // 发送成功了
-            printf("发送部分成功! fd = %d, bytes : %d\n", channel_->fd(), nwrite);
             remain = len - nwrite;
             if (remain == 0 && writeCompeletecb_) {
                 // 这里直接发送成功了，不需要设置epollout | handwrite了

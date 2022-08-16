@@ -22,9 +22,10 @@ void onMessage(const TcpConnectionPtr& conn, Buffer* buffer, TimeStamp receiveTi
     printf("onMessage() : reveived %zd bytes from connection [%s]]]] at %s\n",
         buffer->readableBytes(), conn->name().c_str(), receiveTime.toString().c_str());
 
-    printf("onMessage(): [%s]\n", buffer->retrieveAllAsString().c_str());
-    // conn->send(buffer->retrieveAllAsString());
-    conn->send("能不能发过去\n");
+    const std::string tmp  = (buffer->retrieveAllAsString());
+    std::string str = "肖冰说:";
+    str += tmp;
+    conn->send(str);
 }
 
 

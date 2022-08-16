@@ -33,7 +33,7 @@ void Socket::listen() {
 
 void Socket::bindAddr(const InetAddress& localaddr) {
     if (::bind(sockfd_, (sockaddr*)localaddr.getSockAddr(), sizeof (sockaddr_in)) < 0) {
-        printf("bind sockfd:%d error\n", sockfd_);
+        printf("bind sockfd:%d error, May be Address in use.\n", sockfd_);
     }
 }
 
@@ -64,6 +64,7 @@ int Socket::accept(InetAddress* peeraddr) {
 //能够绑定处于time_wait状态的地址
 void Socket::setReuseAddr(bool on) {
     int statval = on ? 1 : 0;
+    // printf("addressReuse\n");
     ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &statval, sizeof statval);
 } 
 
