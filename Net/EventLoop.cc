@@ -6,6 +6,7 @@
 
 #include <sys/eventfd.h>
 #include <assert.h>
+#include <signal.h>
 #include <poll.h>
 #include <vector>
 
@@ -28,6 +29,14 @@ int createEventfd() {
     return fd;
 }
 
+class IgnoreSigPipe {
+public:
+    IgnoreSigPipe() {
+        ::signal(SIGPIPE, SIG_IGN);
+    }
+};
+
+IgnoreSigPipe initObj_;
 
 EventLoop::EventLoop() 
     :looping_(false), threadId_(currentThread::tid()), quit_(false), poller_(Poller::newDefaultPoller(this)) ,

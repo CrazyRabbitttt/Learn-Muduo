@@ -61,12 +61,18 @@ int Socket::accept(InetAddress* peeraddr) {
     return connfd;
 }
 
-//能够绑定处于time_wait状态的地址
+// 能够绑定处于time_wait状态的地址, 
 void Socket::setReuseAddr(bool on) {
     int statval = on ? 1 : 0;
     // printf("addressReuse\n");
     ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &statval, sizeof statval);
 } 
+
+// 禁用Nagle算法
+void Socket::setNoDelay(bool on) {
+    int optcal = on ? 1 : 0;
+    ::setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY, &optcal, sizeof optcal);
+}
 
 
 void Socket::setReusePort(bool on) {
@@ -74,6 +80,8 @@ void Socket::setReusePort(bool on) {
     ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, &statval, sizeof statval);
 }
 
+
+// 保活机制
 void Socket::keepAlive(bool on) {
     int optval = on ? 1 : 0;
     ::setsockopt(sockfd_, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof optval);

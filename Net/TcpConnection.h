@@ -42,10 +42,15 @@ public:
     // 关闭连接
     void shutdown();
 
-
+    // 设置回调函数
     void setConnectionCallBack(const ConnectionCallback& cb) { connectioncb_ = cb; }
     void setMessageCallBack(const MessageCallback& cb) { messagecb_ = cb; }
     void setCloseCallBack(const CloseCallback& cb) { closecb_ = cb; }
+    void setHighWaterMarkCallBack(const HighWaterMarkCallback& cb, size_t highWaterMark) {
+        highWaterMarkcb_ = cb;
+        highWaterMark_ = highWaterMark;
+    }
+
 
     // 进行连接的建立
     void connectEstablished();                      //只能被调用一次
@@ -78,7 +83,9 @@ private:
     MessageCallback messagecb_;
     CloseCallback closecb_; 
     WriteCompleteCallback writeCompeletecb_;        
+    HighWaterMarkCallback highWaterMarkcb_; 
 
+    size_t highWaterMark_;                          // 水位线
 
     Buffer inputBuffer_;                            // 接受数据的缓冲区，内部从tcp读完写到这里
     Buffer outputBuffer_;                           // 发送数据的缓冲区, 写到这里然后内部发送

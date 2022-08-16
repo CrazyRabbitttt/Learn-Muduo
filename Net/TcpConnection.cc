@@ -26,11 +26,12 @@ TcpConnection::TcpConnection(EventLoop* loop,
       socket_(new Socket(sockfd)),
       channel_(new Channel(loop, sockfd)),
       localaddr_(localAddr),
-      peeraddr_(peerAddr)
+      peeraddr_(peerAddr), 
+      highWaterMark_(64 * 1024 * 1024)
     {
         //进行可读事件的回调， socket上的可读事件被触发了
         channel_->setReadCallBack(std::bind(&TcpConnection::handleRead, this, std::placeholders::_1));      //绑定，传送参数
-        channel_->setWriteCallBack(std::bind(&TcpConnection::handleClose, this));
+        channel_->setWriteCallBack(std::bind(&TcpConnection::handleWrite, this));
         channel_->setErrorCallBack(std::bind(&TcpConnection::handleError, this));
         channel_->setCloseCallBack(std::bind(&TcpConnection::handleClose, this));
     }
@@ -41,8 +42,7 @@ TcpConnection::~TcpConnection() {
 
 
 void TcpConnection::connectEstablished() {
-    loop_->assertInLoopThread();
-    assert(state_ == kConnecting);
+
     setState(kConnected);
     channel_->enableReading();      //注册可读， socket
     //调用callback 
@@ -96,13 +96,14 @@ void TcpConnection::send(const std::string& message) {
 
 
 /*
+    sendinloop: 在对应的io线程中去发送数据
     发送数据，把等待发送的数据写入到缓冲区中去
+    如果应用写的很快， 内核发送数据比较的满， 写入到缓冲区中，设置水位回调
 */
 void TcpConnection::sendInloop(const void* data, size_t len) {
     ssize_t nwrite = 0;
     ssize_t remain = len;     //剩余的还没有发送的数据
     bool faultError = false;
-
 
     // 断开连接的状态， 不能再发送了，之前调用了shutdown()
     if (state_ == kdisConnected) {
@@ -140,9 +141,13 @@ void TcpConnection::sendInloop(const void* data, size_t len) {
         缓冲区有数据Epoll会唤醒对应的writecallback, 也就是调用handlewrite 
     */
     if (!faultError && remain > 0) {
+        // 之前的缓冲区的剩余部分的数据长度，
         size_t oldlen = outputBuffer_.readableBytes();
-
-        //将剩余的数据写入buffer中
+        // 如果需要调整高水位
+        if (oldlen + remain >= highWaterMark_ && oldlen < highWaterMark_ && highWaterMarkcb_) {
+            loop_->queueInLoop(std::bind(highWaterMarkcb_, shared_from_this(), oldlen + remain));
+        }
+        // 将剩余的数据写入buffer中, 要注意添加到之前还剩余的数据的后面
         outputBuffer_.append((char*)data + nwrite, remain);
         if (!channel_->isWriting()) {   // 如果没有关注写的事件
             channel_->enableWriting();  // 注册写事件
@@ -151,31 +156,29 @@ void TcpConnection::sendInloop(const void* data, size_t len) {
 
 }
 
-
+// 发送数据没发送完，写到缓冲区中了，回调函数(HandleWrite)就是将缓冲区中的数据发送
 void TcpConnection::handleWrite() {
     // 如果关注了写事件
-    if (channel_->isWriting()) {
+    if (channel_->isWriting()) {        // 前提肯定是需要关注了写的事件啦
         int saveErrno = 0;
         ssize_t n = outputBuffer_.writeFd(channel_->fd(), &saveErrno);
-        if (n > 0) {
-            // 如果写成功了，就更新一下buffer中指针的位置
+        if (n > 0) {    
+            // 写成功了， 更新一下缓冲区的指针
             outputBuffer_.retrieve(n);
-            // 发送完成
+            // 如果全部都发送完成了， 从epoll中注销掉写事件, 执行写成功的回调函数
             if (outputBuffer_.readableBytes() == 0) {
-                // 不再关注写事件
                 channel_->disableWriting();
-                // 执行写成功的回调函数
                 if (writeCompeletecb_) {
-                    // 唤醒loop对应的线程执行回调
-                    loop_->queueInLoop(std::bind(writeCompeletecb_, shared_from_this()));
+                    // 唤醒loop对应的线程，执行写成功的回调函数
+                    loop_->queueInLoop(std::bind(&TcpConnection::writeCompeletecb_, shared_from_this()));
                 }
                 if (state_ == kDisConnecting) {
                     shutdownInloop();
                 }
             }
         } else {
-            // 出错
-            printf("TcpConnection::handleWrite");
+            // 写出错， 
+            printf("TcpConnection::hanldWrite error\n");
         }
     } else {
         // 没有关注写事件
@@ -185,10 +188,14 @@ void TcpConnection::handleWrite() {
 }
 
 void TcpConnection::handleClose() {
+    printf("handle Close ...\n");
     loop_->assertInLoopThread();
     assert(state_ == kConnected);
     channel_->disableAll();
-    closecb_(shared_from_this());
+
+    TcpConnectionPtr connPtr(shared_from_this());
+    connectioncb_(connPtr);         //执行回调函数， 关闭连接的执行
+    closecb_(connPtr);
 }
 
 void TcpConnection::handleError() {

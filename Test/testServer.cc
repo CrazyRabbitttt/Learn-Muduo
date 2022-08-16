@@ -18,7 +18,7 @@ void onConnection(const TcpConnectionPtr& conn) {
 }
 
 
-void onMessage(const TcpConnectionPtr& conn, Buffer* buffer, TimeStamp receiveTime){
+void onMessage(const TcpConnectionPtr& conn, Buffer* buffer, TimeStamp receiveTime) {
     printf("onMessage() : reveived %zd bytes from connection [%s]]]] at %s\n",
         buffer->readableBytes(), conn->name().c_str(), receiveTime.toString().c_str());
 

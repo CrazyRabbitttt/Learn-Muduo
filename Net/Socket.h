@@ -34,7 +34,7 @@ public:
     void setReuseAddr(bool on);
     void setReusePort(bool on);
     void keepAlive(bool on);
-
+    void setNoDelay(bool on);
 
     void shutDownWrite();
 private:
