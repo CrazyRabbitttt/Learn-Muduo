@@ -28,6 +28,7 @@ TARGET4 := ReactorTest			#Reactor的测试， version1
 TARGET5 := RunInLoopTest		#进行Runinloop的测试，eventloopthread
 TARGET6 := AcceptTest			#进行accpet的简单测试
 TARGET7 := ServerTest			#进行Server的简单的测试
+TARGET8 := SimAllTest			#进行单线程的所有功能的测试
 
 
 .PHONY  : objs clean all tests 
@@ -62,3 +63,8 @@ $(TARGET6) : $(OBJS) Test/testAccept.o
 
 $(TARGET7) : $(OBJS) Test/testServer.o
 	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
+
+$(TARGET8) : $(OBJS) Test/testSimAll.o
+	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
+
+

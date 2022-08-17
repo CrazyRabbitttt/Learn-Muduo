@@ -116,9 +116,9 @@ void TcpConnection::sendInloop(const void* data, size_t len) {
         if (nwrite >= 0) {       
             // 发送成功了
             remain = len - nwrite;
-            if (remain == 0 && writeCompeletecb_) {
+            if (remain == 0 && writecompeletecb_) {
                 // 这里直接发送成功了，不需要设置epollout | handwrite了
-                loop_->queueInLoop(std::bind(writeCompeletecb_, shared_from_this()));
+                loop_->queueInLoop(std::bind(writecompeletecb_, shared_from_this()));
             }
         } else {
             // 出错
@@ -168,9 +168,9 @@ void TcpConnection::handleWrite() {
             // 如果全部都发送完成了， 从epoll中注销掉写事件, 执行写成功的回调函数
             if (outputBuffer_.readableBytes() == 0) {
                 channel_->disableWriting();
-                if (writeCompeletecb_) {
+                if (writecompeletecb_) {
                     // 唤醒loop对应的线程，执行写成功的回调函数
-                    loop_->queueInLoop(std::bind(writeCompeletecb_, shared_from_this()));
+                    loop_->queueInLoop(std::bind(writecompeletecb_, shared_from_this()));
                 }
                 if (state_ == kDisConnecting) {
                     shutdownInloop();

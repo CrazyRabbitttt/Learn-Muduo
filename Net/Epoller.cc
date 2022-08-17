@@ -50,7 +50,7 @@ TimeStamp Epoller::poll(int timeoutMs, ChannelList* activeChannels)
         }
     } else if (numEvents == 0) {
         //do nothing 
-        printf("nothing happend\n");
+        // printf("nothing happend\n");
     } else {
         if (errno != EINTR) {
             printf("EPoller::poll() : epoll_wait error\n");

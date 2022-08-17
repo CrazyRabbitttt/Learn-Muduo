@@ -26,7 +26,7 @@ EventLoopThread::~EventLoopThread() {
 }
 
 EventLoop* EventLoopThread::startLoop() {
-    //启动新的线程，运行threadfunc,创建EventLoop
+    // 启动新的线程，运行threadfunc,创建EventLoop
     thread_.start();
 
     {

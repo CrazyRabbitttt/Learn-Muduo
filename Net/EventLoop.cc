@@ -13,11 +13,21 @@
 using namespace bing;
 
 
-//防止线程创建多个EventLoop
+//防止线程创建多个EventLoop, 在创建的时候就需要判断一下这个thread_local的全局变量了
 thread_local EventLoop* t_LoopInThisThread = 0;
 
 //默认的IO多路复用的超时时间
 const int kPollTimeMs = 5000;
+
+class IgnoreSigPipe {
+public:
+    IgnoreSigPipe() {
+        ::signal(SIGPIPE, SIG_IGN);
+    }
+};
+
+IgnoreSigPipe initObj_;     //使用EventLoop的时候，全局对象初始化，SIGPIPE会被自动的进行初始化，忽略掉SIGPIPE
+
 
 
 //创建wakeupfd_,唤醒subReactor处理新的Channel
@@ -29,14 +39,6 @@ int createEventfd() {
     return fd;
 }
 
-class IgnoreSigPipe {
-public:
-    IgnoreSigPipe() {
-        ::signal(SIGPIPE, SIG_IGN);
-    }
-};
-
-IgnoreSigPipe initObj_;
 
 EventLoop::EventLoop() 
     :looping_(false), threadId_(currentThread::tid()), quit_(false), poller_(Poller::newDefaultPoller(this)) ,
@@ -74,8 +76,7 @@ void EventLoop::loop() {
     while (!quit_) {
         activeChannels_.clear();
         pollReturnTime_ = poller_->poll(kPollTimeMs, &activeChannels_);       //获得事件的活动列表
-        // printf("the num of channel: %d\n", activeChannels_.size());
-        printf("the num of activechannels: %d\n", static_cast<int>(activeChannels_.size()));
+        // printf("the num of activechannels: %d\n", static_cast<int>(activeChannels_.size()));
         for (ChannelList::iterator it = activeChannels_.begin(); 
             it != activeChannels_.end(); ++it) 
         {

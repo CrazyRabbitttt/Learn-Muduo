@@ -45,7 +45,8 @@ public:
     // 设置回调函数
     void setConnectionCallBack(const ConnectionCallback& cb) { connectioncb_ = cb; }
     void setMessageCallBack(const MessageCallback& cb) { messagecb_ = cb; }
-    void setCloseCallBack(const CloseCallback& cb) { closecb_ = cb; }
+    void setCloseCallBack(const CloseCallback& cb) { closecb_ = cb; } 
+    void setWriteCompeleteCallBack(const WriteCompleteCallback& cb) { writecompeletecb_ = cb; }
     void setHighWaterMarkCallBack(const HighWaterMarkCallback& cb, size_t highWaterMark) {
         highWaterMarkcb_ = cb;
         highWaterMark_ = highWaterMark;
@@ -81,8 +82,8 @@ private:
     std::atomic_int state_;                         // 连接的状态
     ConnectionCallback connectioncb_;
     MessageCallback messagecb_;
-    CloseCallback closecb_; 
-    WriteCompleteCallback writeCompeletecb_;        
+    CloseCallback closecb_;    
+    WriteCompleteCallback writecompeletecb_;     
     HighWaterMarkCallback highWaterMarkcb_; 
 
     size_t highWaterMark_;                          // 水位线
