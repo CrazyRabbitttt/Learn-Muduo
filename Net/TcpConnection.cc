@@ -170,7 +170,7 @@ void TcpConnection::handleWrite() {
                 channel_->disableWriting();
                 if (writeCompeletecb_) {
                     // 唤醒loop对应的线程，执行写成功的回调函数
-                    loop_->queueInLoop(std::bind(&TcpConnection::writeCompeletecb_, shared_from_this()));
+                    loop_->queueInLoop(std::bind(writeCompeletecb_, shared_from_this()));
                 }
                 if (state_ == kDisConnecting) {
                     shutdownInloop();
@@ -187,6 +187,7 @@ void TcpConnection::handleWrite() {
 
 }
 
+
 void TcpConnection::handleClose() {
     printf("handle Close ...\n");
     loop_->assertInLoopThread();
@@ -194,8 +195,8 @@ void TcpConnection::handleClose() {
     channel_->disableAll();
 
     TcpConnectionPtr connPtr(shared_from_this());
-    connectioncb_(connPtr);         //执行回调函数， 关闭连接的执行
-    closecb_(connPtr);
+    connectioncb_(connPtr);         // 执行回调函数， 关闭连接的执行
+    closecb_(connPtr);              // 执行TcpServer::removeConnection
 }
 
 void TcpConnection::handleError() {

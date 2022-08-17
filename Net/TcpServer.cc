@@ -43,6 +43,7 @@ void TcpServer::start() {
 }
 
 void TcpServer::removeConnection(const TcpConnectionPtr& conn) {
+    printf("remove from connections\n");
     size_t n = connections_.erase(conn->name());      //从map中删除掉
     loop_->queueInLoop(std::bind(&TcpConnection::connectDestoryed, conn));
 }

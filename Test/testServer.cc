@@ -11,8 +11,7 @@ void onConnection(const TcpConnectionPtr& conn) {
         conn->name().c_str(),
         conn->peerAddress().toIpPort().c_str());
     } else {
-        printf("onConnection : connection [%s] is done\n",
-        conn->name().c_str());
+        printf("onConnection : connection [%s] is done\n", conn->name().c_str());
     }
     conn->send("建立连接喽！\n");
 }
