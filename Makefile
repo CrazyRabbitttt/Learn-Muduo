@@ -1,6 +1,7 @@
 MAINSOURCE := Test/testThread.cc Test/testLatch.cc \
 Test/testEventLoop1.cc Test/testReactor.cc \
- Test/testRuninloop.cc Test/testAccept.cc Test/testServer.cc Test/testSimAll.cc
+ Test/testRuninloop.cc Test/testAccept.cc Test/testServer.cc Test/testSimAll.cc \
+ Test/testChat.cc
 
 
 SOURCE := $(wildcard *.cc Base/*.cc Test/*.cc Net/*.cc)
@@ -29,6 +30,7 @@ TARGET5 := RunInLoopTest		#进行Runinloop的测试，eventloopthread
 TARGET6 := AcceptTest			#进行accpet的简单测试
 TARGET7 := ServerTest			#进行Server的简单的测试
 TARGET8 := SimAllTest			#进行单线程的所有功能的测试
+TARGET9 := ChatTest				#进行聊天服务器的测试
 
 
 .PHONY  : objs clean all tests 
@@ -66,5 +68,9 @@ $(TARGET7) : $(OBJS) Test/testServer.o
 
 $(TARGET8) : $(OBJS) Test/testSimAll.o
 	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
+
+$(TARGET9) : $(OBJS) Test/testChat.o
+	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
+
 
 

@@ -6,7 +6,6 @@
 #include <signal.h>
 
 std::string message;
-
 using namespace bing;
 void onConnection(const TcpConnectionPtr& conn) {
     if (conn->connected()) {
