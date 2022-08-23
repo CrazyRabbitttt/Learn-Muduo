@@ -5,9 +5,10 @@
 #include <string.h>     // memcpy 
 #include <string>
 
+namespace bing {
 const int kSmallBuffer = 4000;          // 供LogStream使用
 const int kLargeBuffer = 4000 * 1000;   // 供AsyncLog适用
-using namespace bing;
+
 
 template<int SIZE>      // 使用的时候指定int类型的大小 ： LogBuffer<kSmallBuffer>
 class LogBuffer : nocopyable {
@@ -39,6 +40,8 @@ class LogBuffer : nocopyable {
     // 重置缓冲区
     void reset() { cur_ = data_; }
 
+    void bzero() { memset(data_, 0, sizeof data_); }
+
     //  1 2 3 4 5 6 7 8 9    
     //  | | | | | | | | 
     // 缓冲区剩余空间的大小
@@ -62,7 +65,7 @@ class LogBuffer : nocopyable {
 class LogStream : nocopyable{
     using self = LogStream;
  public:
-    using Buffer = LogBuffer<kSmallBuffer>;
+    using Buffer = LogBuffer<kSmallBuffer>;     // 缓冲区比较小，主要是将一条日志缓存成为一行
 
 
     // 重载 << 运算符 (将内容写到缓冲区中)
@@ -132,3 +135,4 @@ class LogStream : nocopyable{
 };
 
 
+}       //namespace bing 

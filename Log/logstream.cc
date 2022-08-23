@@ -3,6 +3,8 @@
 #include <stdint.h>                 //size-t
 #include <algorithm>
 
+using namespace bing;
+
 const char digits[] = "9876543210123456789";   // 数字
 const char* zero = digits + 9;                 // 零的位置
 const char digitsHex[] = "0123456789ABCDEF";   // 十六进制

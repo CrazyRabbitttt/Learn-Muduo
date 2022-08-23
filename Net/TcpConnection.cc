@@ -94,6 +94,14 @@ void TcpConnection::send(const std::string& message) {
     }
 }
 
+void TcpConnection::send(Buffer* buffer) {    
+    if (state_ == kConnected) {
+        send(std::move(string(buffer->peek(), buffer->readableBytes())));
+        buffer->retrieveAll();
+    }
+}
+
+
 
 /*
     sendinloop: 在对应的io线程中去发送数据
@@ -132,7 +140,6 @@ void TcpConnection::sendInloop(const void* data, size_t len) {
                     faultError = true;
                 }
             }
-
         }
     }
 

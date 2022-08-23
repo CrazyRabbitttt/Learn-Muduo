@@ -47,11 +47,9 @@ class TcpServer : nocopyable {
     std::unique_ptr<Accepter> accepter_;        //mainloop, 进行连接事件的监听
     std::shared_ptr<EventLoopThreadPool> threadPool_;  // 线程池
 
-
     ConnectionCallback connectioncb_;           //新连接的回调函数
     MessageCallback messagecb_;                 //读写消息的回调
     WriteCompleteCallback writecompletecb_;     //写成功的回调
-
 
     std::atomic_int started_;
     int nextConnId_;

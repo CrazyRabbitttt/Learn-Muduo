@@ -4,6 +4,8 @@
 #include "Learn-Muduo/Base/Mutex.h"
 
 #include <pthread.h>
+#include <sys/time.h>
+#include <errno.h>
 
 namespace bing {
 class Condition {
@@ -28,6 +30,13 @@ class Condition {
 
     void wait() {
         pthread_cond_wait(&cond_, mutex_.getPthreadLock());
+    }
+
+    bool waitForSeconds(double seconds) {
+        struct timespec abstime;
+        clock_gettime(CLOCK_REALTIME, &abstime);
+        abstime.tv_sec += static_cast<time_t>(seconds);
+        return ETIMEDOUT == pthread_cond_timedwait(&cond_, mutex_.getPthreadLock(), &abstime);
     }
 
  private:

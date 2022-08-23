@@ -5,6 +5,7 @@
 #include "Learn-Muduo/Net/Callback.h"
 #include "Learn-Muduo/Base/nocopyable.h"
 #include "Learn-Muduo/Net/Buffer.h"
+#include "Learn-Muduo/Http/httpContent.h"
 #include <memory>
 #include <atomic>
 
@@ -38,6 +39,13 @@ public:
 
     // 发送数据
     void send(const std::string& buf);
+
+    void send(Buffer* buffer);
+
+    // 给到Server去填充
+    HttpContent* getHttpContent() {
+        return &content_;
+    }
 
     // 关闭连接
     void shutdown();
@@ -88,6 +96,7 @@ private:
 
     size_t highWaterMark_;                          // 水位线
 
+    HttpContent content_;                           // 保存了对端的报文数据， 内部的话同样保存了请求和响应报文
     Buffer inputBuffer_;                            // 接受数据的缓冲区，内部从tcp读完写到这里
     Buffer outputBuffer_;                           // 发送数据的缓冲区, 写到这里然后内部发送
 };

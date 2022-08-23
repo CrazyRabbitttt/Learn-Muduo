@@ -71,7 +71,7 @@ private:
     static const int kWriteEvent;
 
     EventLoop* loop_;        //属于哪一个EventLoop事件循环, 
-    int fd_;          //Poller 监听的对象
+    int fd_;                //Poller 监听的对象
     int events_;            //fd感兴趣的事件， bit pattern 
     int revents_;           //当前的事件
     int index_;             //used by poller， Epoller中的状态

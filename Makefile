@@ -1,10 +1,6 @@
-MAINSOURCE := Test/testThread.cc Test/testLatch.cc \
-Test/testEventLoop1.cc Test/testReactor.cc \
- Test/testRuninloop.cc Test/testAccept.cc Test/testServer.cc Test/testSimAll.cc \
- Test/testChat.cc
+MAINSOURCE := Main.cc
 
-
-SOURCE := $(wildcard *.cc Base/*.cc Test/*.cc Net/*.cc)
+SOURCE := $(wildcard *.cc Base/*.cc Http/*.cc Net/*.cc)
 
 #反过滤，过滤不是main函数的文件
 override SOURCE := $(filter-out $(MAINSOURCE), $(SOURCE))	
@@ -31,6 +27,7 @@ TARGET6 := AcceptTest			#进行accpet的简单测试
 TARGET7 := ServerTest			#进行Server的简单的测试
 TARGET8 := SimAllTest			#进行单线程的所有功能的测试
 TARGET9 := ChatTest				#进行聊天服务器的测试
+WebV1	:= WebServer 
 
 
 .PHONY  : objs clean all tests 
@@ -38,9 +35,13 @@ TARGET9 := ChatTest				#进行聊天服务器的测试
 objs    : $(OBJS)
 clean   : 
 			find ./Base/ -name "*.o" | xargs rm -f
-			find ./Net/ -name "*.o" | xargs rm -f
+			find ./Net/ -name "*.o"  | xargs rm -f
 			find ./Test/ -name "*.o" | xargs rm -f	
+			find ./Http -name  "*.o" | xargs rm -f
 
+
+$(WebV1) : $(OBJS) Main.cc
+	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
 
 
 $(TARGET1) : $(OBJS) Test/testThread.o

@@ -2,7 +2,7 @@
 #define BING_NET_BUFFER_H_
 
 
-
+#include <assert.h>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -45,6 +45,12 @@ namespace bing {
             return buffer_.size() - writeIdx_;
         }
 
+        char* beginread() { return begin() + readIdx_; } 
+        const char* beginread() const { return begin() + readIdx_; }
+
+        char* beginwrite() { return begin() + writeIdx_; }
+        const char* beginwrite() const { return begin() + writeIdx_; }
+
         // read指针之前的部分
         size_t prependanleBytes() const {
             return readIdx_;
@@ -67,6 +73,12 @@ namespace bing {
             retrieve(len);
             return res;
         } 
+
+        // 目前已经读完到index了， 更新位置
+        void retrieveUntilIdx(const char* index) {
+            assert(beginwrite() >= index);
+            readIdx_ += static_cast<int>(index - beginread());
+        }
 
         //读了len之后对指针进行移动
         void retrieve(size_t len) {  
@@ -96,6 +108,9 @@ namespace bing {
             writeIdx_ += len;
         }
 
+        void append(const std::string& data) {
+            append(data.data(), data.size());
+        }
 
         // 返回可写部分的指针
         char* beginwritePtr() {
