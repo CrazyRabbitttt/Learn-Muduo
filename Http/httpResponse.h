@@ -25,7 +25,7 @@ class HttpResponse {
 
  public:
     HttpResponse(bool close_connection)
-        : type_("text/plain"),              // 按照纯文本的方式传送回去
+        : type_("text/html"),              // 按照纯文本的方式传送回去
           close_connection_(close_connection) {}
     ~HttpResponse() {}
 
@@ -39,7 +39,7 @@ class HttpResponse {
     void setBody(const char* body) { body_ = body; }
     void AppendToBuffer(Buffer* buffer);        // 将response整合 & 回送？
 
-    bool IsConnectionClosed() const { return close_connection_; }
+    bool CloseConnection() const { return close_connection_; }
 
  private:
     static const string  server_name_;

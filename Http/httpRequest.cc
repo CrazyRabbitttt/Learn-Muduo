@@ -73,7 +73,7 @@ void HttpRequest::ParseRequestLine(const char* start, const char* end, HttpReque
     state == kParseErrno;
     return;
   }
-  printf("Parse Request Line, Method:%d, Url:%s, Version:%d\n", method_, path_.c_str(), version_);
+
 //============
   state = kParseRequestHeader;            // 下面主状态机去解析headers去吧
 }

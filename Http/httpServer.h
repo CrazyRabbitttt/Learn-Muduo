@@ -38,7 +38,12 @@ class HttpServer {
 
 
     void ConnectionCallback(const TcpConnectionPtr& conn) {
-        printf("HttpServer has a new connection\n");
+        if (conn->connected()) {
+            printf("%s -> %s state:online \n", conn->peerAddress().toIpPort().c_str(), conn->localAddress().toIpPort().c_str());
+        } else {
+            printf("%s -> %s state:offline \n", conn->peerAddress().toIpPort().c_str(), conn->localAddress().toIpPort().c_str());
+            conn->shutdown();       // 也就是关闭连接
+        }
     }
     
     // void MessageCallback(const TcpConnectionPtr& conn, Buffer* buffer, TimeStamp time);

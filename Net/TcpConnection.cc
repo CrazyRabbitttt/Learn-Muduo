@@ -37,15 +37,13 @@ TcpConnection::TcpConnection(EventLoop* loop,
     }
 
 TcpConnection::~TcpConnection() {
-    printf("~TcpConnection, fd = %d\n", channel_->fd());
+    // printf("~TcpConnection, fd = %d\n", channel_->fd());
 }
 
-
 void TcpConnection::connectEstablished() {
-
     setState(kConnected);
     channel_->enableReading();      //注册可读， socket
-    //调用callback 
+    //调用Connectioncallback 
     connectioncb_(shared_from_this());
 }
 
@@ -56,6 +54,7 @@ void TcpConnection::connectDestoryed() {
         channel_->disableAll();                 // 将Channel的关注事件清零
         connectioncb_(shared_from_this());      // 执行回调函数
     }
+    // 将channel从EPOLLER中删除掉
     channel_->remove();
 }
 
@@ -67,7 +66,7 @@ void TcpConnection::handleRead(TimeStamp receiveTime) {
         // 读事件发生，调用用户的回调
         messagecb_(shared_from_this(), &inputBuffer_, receiveTime);
     } else if (n == 0) {
-        handleClose();                          // 客户端断开了
+        handleClose();                          // read = 0, 客户端断开了, 唯一的断开连接的方式
     } else {
         //TODO : log 
         errno = saveErrno;
@@ -76,20 +75,28 @@ void TcpConnection::handleRead(TimeStamp receiveTime) {
 }
 
 
-// 发送数据
-void TcpConnection::send(const std::string& message) {
-    // 如果已经是连接了的
-    if (state_ == kConnected) {
-        // 是否是在当前的线程
-        if (loop_->isInLoopThread()) {
-            sendInloop(message.c_str(), message.size());
-        } else {        //不是的话，转到loop_所在的线程进行发送
-            printf("转到IO线程去执行\n");
-            loop_->runInLoop(std::bind(
-                &TcpConnection::sendInloop,
-                 this,
-                 message.c_str(),
-                 message.size()));
+void TcpConnection::send(const string& message) {
+    int remain = message.size();
+    int send_size = 0;
+    // channel_第一次写数据(epoll没关注写时间)，缓冲区不能有待发送的数据
+    if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0) {
+        send_size = static_cast<int>(::write(channel_->fd(), message.data(), message.size()));
+        if (send_size >= 0) {
+            remain -= send_size;
+        } else {
+            if (errno != EWOULDBLOCK) {
+                printf("TcpConnection::Send write failed\n");
+            }
+            return ;
+        }
+    }
+
+    assert(remain <= message.size());
+    if (remain > 0) {
+        // 将剩余的数据写入buffer中, 要注意添加到之前还剩余的数据的后面
+        outputBuffer_.append((char*)message.c_str() + send_size, remain);
+        if (!channel_->isWriting()) {   // 如果没有关注写的事件
+            channel_->enableWriting();  // 注册写事件
         }
     }
 }
@@ -103,66 +110,6 @@ void TcpConnection::send(Buffer* buffer) {
 
 
 
-/*
-    sendinloop: 在对应的io线程中去发送数据
-    发送数据，把等待发送的数据写入到缓冲区中去
-    如果应用写的很快， 内核发送数据比较的满， 写入到缓冲区中，设置水位回调
-*/
-void TcpConnection::sendInloop(const void* data, size_t len) {
-    ssize_t nwrite = 0;
-    ssize_t remain = len;     //剩余的还没有发送的数据
-    bool faultError = false;
-
-    // 断开连接的状态， 不能再发送了，之前调用了shutdown()
-    if (state_ == kdisConnected) {
-        printf("TcpConnection::sendinloop, can not write, connection is done!\n");
-        return;
-    }
-    // channel_第一次写数据(epoll没关注写时间)，缓冲区不能有待发送的数据
-    if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0) {
-        nwrite = ::write(channel_->fd(), data, len);
-        if (nwrite >= 0) {       
-            // 发送成功了
-            remain = len - nwrite;
-            if (remain == 0 && writecompeletecb_) {
-                // 这里直接发送成功了，不需要设置epollout | handwrite了
-                loop_->queueInLoop(std::bind(writecompeletecb_, shared_from_this()));
-            }
-        } else {
-            // 出错
-            nwrite = 0;
-            // EWOULDBLOCK:非阻塞IO，还没有数据导致的返回
-            if (errno != EWOULDBLOCK) {
-                //TODO:log
-                printf("error, TcpConnection::sendInloop");
-                // 如果是因为连接重置？
-                if (errno == EPIPE || errno == ECONNREFUSED) {
-                    faultError = true;
-                }
-            }
-        }
-    }
-
-    /*
-        这一次数据没有全部发送出去，剩余的数据需要写到缓冲区中去, 注册channel-的epollout事件
-        缓冲区有数据Epoll会唤醒对应的writecallback, 也就是调用handlewrite 
-    */
-    if (!faultError && remain > 0) {
-        // 之前的缓冲区的剩余部分的数据长度，
-        size_t oldlen = outputBuffer_.readableBytes();
-        // 如果需要调整高水位
-        if (oldlen + remain >= highWaterMark_ && oldlen < highWaterMark_ && highWaterMarkcb_) {
-            loop_->queueInLoop(std::bind(highWaterMarkcb_, shared_from_this(), oldlen + remain));
-        }
-        // 将剩余的数据写入buffer中, 要注意添加到之前还剩余的数据的后面
-        outputBuffer_.append((char*)data + nwrite, remain);
-        if (!channel_->isWriting()) {   // 如果没有关注写的事件
-            channel_->enableWriting();  // 注册写事件
-        }
-    }
-
-}
-
 // 发送数据没发送完，写到缓冲区中了，回调函数(HandleWrite)就是将缓冲区中的数据发送
 void TcpConnection::handleWrite() {
     // 如果关注了写事件
@@ -175,10 +122,12 @@ void TcpConnection::handleWrite() {
             // 如果全部都发送完成了， 从epoll中注销掉写事件, 执行写成功的回调函数
             if (outputBuffer_.readableBytes() == 0) {
                 channel_->disableWriting();
-                if (writecompeletecb_) {
-                    // 唤醒loop对应的线程，执行写成功的回调函数
-                    loop_->queueInLoop(std::bind(writecompeletecb_, shared_from_this()));
-                }
+                // 用不到写成功的回调函数
+                // if (writecompeletecb_) {
+                //     // 唤醒loop对应的线程，执行写成功的回调函数
+                //     printf("Writecompletecallback\n");
+                //     loop_->queueInLoop(std::bind(writecompeletecb_, shared_from_this()));
+                // }
                 if (state_ == kDisConnecting) {
                     shutdownInloop();
                 }
@@ -191,19 +140,16 @@ void TcpConnection::handleWrite() {
         // 没有关注写事件
         printf("TcpConnection fd=%d is down, no more writing \n", channel_->fd());
     }
-
 }
 
 
 void TcpConnection::handleClose() {
-    printf("handle Close ...\n");
-    loop_->assertInLoopThread();
-    assert(state_ == kConnected);
+    setState(kdisConnected);        // 设置状态为DisConnected
     channel_->disableAll();
 
     TcpConnectionPtr connPtr(shared_from_this());
     connectioncb_(connPtr);         // 执行回调函数， 关闭连接的执行
-    closecb_(connPtr);              // 执行TcpServer::removeConnection
+    closecb_(connPtr);              // 执行TcpServer::removeConnection, 最终DestoryConnection 
 }
 
 void TcpConnection::handleError() {
@@ -215,7 +161,6 @@ void TcpConnection::handleError() {
     } else {
         err = optval;
     }
-
     printf("TcpConnection::handleError name:%s - SO_ERROR:%d \n", name_.c_str(), err);
 }
 

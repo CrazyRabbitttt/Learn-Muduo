@@ -19,7 +19,7 @@ void HttpResponseCallBack(const HttpRequest& request, HttpResponse& response) {
     }
 
     const string& path = request.path();
-    if (path == "/") {
+    if (path == "/index") {
         response.setStatusCode(k200OK);
         response.setBodyType("text/html");
         response.setBody(Website);

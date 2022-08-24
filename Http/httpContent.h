@@ -22,9 +22,6 @@ class HttpContent {
         parse_state_ = kParseRequestLine;
         line_state_  = kLineOK; 
     }
-    void show() {
-        printf("Method:%d, Url:%s, Version:%d\n", request_.method(), request_.path().c_str(), request_.version());
-    }
 
  private:
     int checked_idx_;

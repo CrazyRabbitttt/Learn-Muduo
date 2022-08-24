@@ -24,12 +24,12 @@ void HttpServer::MessageCallback(const TcpConnectionPtr& conn, Buffer* buffer, T
         conn->send("HTTP/1.1 400 Bad Request\r\n\r\n");
         conn->shutdown();
     }
-    content->show();
     // 解析HTTP请求成功
     if (content->GetCompleteRequest()) {
         dealWithRequest(content->request(), conn);
         content->ResetContentState();
     }
+
 }
 
 void HttpServer::dealWithRequest(const HttpRequest& request, const TcpConnectionPtr& conn) {
@@ -42,6 +42,10 @@ void HttpServer::dealWithRequest(const HttpRequest& request, const TcpConnection
     Buffer buffer;
     response.AppendToBuffer(&buffer);
     conn->send(&buffer);
+
+    if (response.CloseConnection()) {
+
+    }
 }
 
 

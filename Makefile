@@ -40,7 +40,7 @@ clean   :
 			find ./Http -name  "*.o" | xargs rm -f
 
 
-$(WebV1) : $(OBJS) Main.cc
+$(WebV1) : $(OBJS) Main.o
 	$(CC) $(CXXFLAGS) -o   $@ $^  $(LDFLAGS) $(LIBS)
 
 

@@ -69,7 +69,7 @@ void TcpServer::removeConnectionInLoop(const TcpConnectionPtr& conn) {
 void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr) {
 
     // 轮询算法选择一个subLoop来进行Channel的管理
-    EventLoop* ioLoop = threadPool_->getNextLoop();
+    EventLoop* ioLoop = threadPool_->getNextLoop();     // get 一个subLoop
 
     //创建TcpConnectionPtr
     loop_->assertInLoopThread();
@@ -92,9 +92,10 @@ void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr) {
         ioLoop, connName, sockfd, localAddr, peerAddr       // 这里的loop传入的是轮询得到的EventLoop
     ));
 
-    //将连接加入到map中
+    //将连接conn加入到map中
     connections_[connName] = conn;
     // 用户设置的回调函数
+    // TcpServer => TcpConnection => Channel => EPoller => 通知Channel执行回调函数
     conn->setConnectionCallBack(connectioncb_);
     conn->setMessageCallBack(messagecb_);
     conn->setWriteCompeleteCallBack(writecompletecb_);
@@ -102,10 +103,9 @@ void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr) {
     conn->setCloseCallBack(std::bind(&TcpServer::removeConnection, this, std::placeholders::_1));
 
     // 直接调用回调函数，建立连接
-    conn->connectEstablished();    
+    // conn->connectEstablished();    
     // 直接调用连接的建立
     ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
-
 }
 
 

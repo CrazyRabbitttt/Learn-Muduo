@@ -33,7 +33,7 @@ public:
 private:        
 
     //进行listen到的处理，进行accept
-    void handleRead();  
+    void NewConnection();  
 
     EventLoop* loop_;            //main loop, 用户定义的事件循环
     Channel acceptChannel_;     
