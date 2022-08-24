@@ -13,7 +13,7 @@ void HttpResponseCallBack(const HttpRequest& request, HttpResponse& response) {
     // 进行资源的分发处理
     if (request.method() != kGet) {
         response.setStatusCode(k400BadRequest);
-        response.setStatusMessage("Bas Request");
+        response.setStatusMessage("Bad Request");
         response.setCloseConnection(true);
         return;
     }

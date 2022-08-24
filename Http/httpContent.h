@@ -3,6 +3,7 @@
 
 #include "Learn-Muduo/Http/httpRequest.h"
 #include "Learn-Muduo/Http/httpResponse.h"
+#include <string.h>
 
 namespace bing {
 
@@ -22,7 +23,7 @@ class HttpContent {
         line_state_  = kLineOK; 
     }
     void show() {
-        printf("Method:%s, Url:%s, Version:%s\n", request_.method(), request_.path(), request_.version());
+        printf("Method:%d, Url:%s, Version:%d\n", request_.method(), request_.path().c_str(), request_.version());
     }
 
  private:

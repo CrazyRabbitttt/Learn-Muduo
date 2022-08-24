@@ -64,7 +64,7 @@ void HttpRequest::ParseRequestLine(const char* start, const char* end, HttpReque
   // 判断一下版本
   const char chr = *(httpindex + httpLen);
   if (httpindex + httpLen + 1 == end && (chr == '1' || chr == '0')) {
-    if (chr == '1') {
+    if (chr == '0') {
       version_ = kHttp10;
     } else {
       version_ = kHttp11;
@@ -73,12 +73,13 @@ void HttpRequest::ParseRequestLine(const char* start, const char* end, HttpReque
     state == kParseErrno;
     return;
   }
+  printf("Parse Request Line, Method:%d, Url:%s, Version:%d\n", method_, path_.c_str(), version_);
 //============
   state = kParseRequestHeader;            // 下面主状态机去解析headers去吧
 }
                      
 void HttpRequest::ParseHeaders(const char* start, const char* end, HttpRequestParseState& state ) {
-    // 如果是头部的全都解析完毕， 只剩下\r\n
+    // 如果是头部的全都解析完毕， 只剩下空的➕\r\n
     if (start == end && *start == '\r' && *(start + 1) == '\n') {
       state = kParseGotCompleteRequest;
       return ;
@@ -99,3 +100,5 @@ void HttpRequest::ParseHeaders(const char* start, const char* end, HttpRequestPa
 }
 
 
+void  HttpRequest::ParseBody(const char* start, const char* end,
+                          HttpRequestParseState& state) {}

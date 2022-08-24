@@ -40,7 +40,7 @@ class HttpServer {
     void ConnectionCallback(const TcpConnectionPtr& conn) {
         printf("HttpServer has a new connection\n");
     }
-
+    
     // void MessageCallback(const TcpConnectionPtr& conn, Buffer* buffer, TimeStamp time);
     void MessageCallback(const TcpConnectionPtr& conn, Buffer* buffer, TimeStamp time);
 

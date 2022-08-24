@@ -18,18 +18,15 @@ HttpServer::HttpServer(EventLoop* loop, const InetAddress& address)
 HttpServer::~HttpServer() {}
 
 void HttpServer::MessageCallback(const TcpConnectionPtr& conn, Buffer* buffer, TimeStamp time) {
-    printf("Message call back!\n");
+
     HttpContent* content = conn->getHttpContent();
     if (!content->ParseContent(buffer)) {
-        printf("Parse Http content error!\n");
         conn->send("HTTP/1.1 400 Bad Request\r\n\r\n");
         conn->shutdown();
     }
-    printf("Parse Http Request sucess!\n");
     content->show();
     // 解析HTTP请求成功
     if (content->GetCompleteRequest()) {
-        printf("Now will deal with Request\n");
         dealWithRequest(content->request(), conn);
         content->ResetContentState();
     }

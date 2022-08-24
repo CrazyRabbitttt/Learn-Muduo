@@ -25,7 +25,7 @@ void HttpContent::ParseLine(Buffer* buffer) {
             if (checked_idx_ == read_idx - 1) continue;             // 最后一个刚好是\r, \n还没读过来呢
             if (buf[checked_idx_+1] == '\n') {
                 checked_idx_  += 2;
-                line_state_ == kLineOK;
+                line_state_ = kLineOK;                              // 🐛：多写了一个等于号
             } else {
                 line_state_ = kLineError;
             }
@@ -45,7 +45,6 @@ void HttpContent::ParseLine(Buffer* buffer) {
     return ;
 }
 
-
 bool HttpContent::ParseContent(Buffer* buffer) {
     while (parse_state_ != kParseErrno) {
         ParseLine(buffer);      // 进行解析一行出来，更新checkindex
@@ -63,9 +62,9 @@ bool HttpContent::ParseContent(Buffer* buffer) {
         if (parse_state_ == kParseRequestLine) {
             request_.ParseRequestLine(start, end, parse_state_);
         } else if (parse_state_ == kParseRequestHeader) {
-            request_.ParseRequestLine(start, end, parse_state_);
+            request_.ParseHeaders(start, end, parse_state_);
         } else if (parse_state_ == kParseBody) {
-            request_.ParseRequestLine(start, end, parse_state_);
+            request_.ParseBody(start, end, parse_state_);
         } else if (parse_state_ == kParseGotCompleteRequest) {
             break;          // 解析完成了，退出
         } 
