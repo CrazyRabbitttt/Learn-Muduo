@@ -8,7 +8,7 @@
 using namespace bing;
 
 HttpServer::HttpServer(EventLoop* loop, const InetAddress& address)
-    :loop_(loop), server_(loop, address, "HttpServer")
+    :loop_(loop), server_(loop, address, "HttpServer"), latch_(1)
 {
     server_.setConnectionCallback(std::bind(&HttpServer::ConnectionCallback, this, std::placeholders::_1));
     server_.setMessageCallback(std::bind(&HttpServer::MessageCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -18,7 +18,6 @@ HttpServer::HttpServer(EventLoop* loop, const InetAddress& address)
 HttpServer::~HttpServer() {}
 
 void HttpServer::MessageCallback(const TcpConnectionPtr& conn, Buffer* buffer, TimeStamp time) {
-
     HttpContent* content = conn->getHttpContent();
     if (!content->ParseContent(buffer)) {
         conn->send("HTTP/1.1 400 Bad Request\r\n\r\n");
@@ -26,10 +25,9 @@ void HttpServer::MessageCallback(const TcpConnectionPtr& conn, Buffer* buffer, T
     }
     // 解析HTTP请求成功
     if (content->GetCompleteRequest()) {
-        dealWithRequest(content->request(), conn);
+        dealWithRequest(content->request(), conn);  
         content->ResetContentState();
     }
-
 }
 
 void HttpServer::dealWithRequest(const HttpRequest& request, const TcpConnectionPtr& conn) {
@@ -42,9 +40,9 @@ void HttpServer::dealWithRequest(const HttpRequest& request, const TcpConnection
     Buffer buffer;
     response.AppendToBuffer(&buffer);
     conn->send(&buffer);
-
-    if (response.CloseConnection()) {
-
+    if (response.CloseConnection()) {    // 不是长连接， 关闭连接但是可能数据发送有问题
+        conn->shutdown();
+        // conn->shutdownRead();           // 关闭读端，写端不关闭
     }
 }
 

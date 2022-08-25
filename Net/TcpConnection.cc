@@ -96,6 +96,7 @@ void TcpConnection::send(const string& message) {
         // 将剩余的数据写入buffer中, 要注意添加到之前还剩余的数据的后面
         outputBuffer_.append((char*)message.c_str() + send_size, remain);
         if (!channel_->isWriting()) {   // 如果没有关注写的事件
+            printf("数据没发送完，放到buffer中，注册写事件\n");
             channel_->enableWriting();  // 注册写事件
         }
     }
@@ -115,6 +116,7 @@ void TcpConnection::handleWrite() {
     // 如果关注了写事件
     if (channel_->isWriting()) {        // 前提肯定是需要关注了写的事件啦
         int saveErrno = 0;
+        printf("触发了写事件，将缓冲区的内容写到对端\n");
         ssize_t n = outputBuffer_.writeFd(channel_->fd(), &saveErrno);
         if (n > 0) {    
             // 写成功了， 更新一下缓冲区的指针
@@ -168,15 +170,23 @@ void TcpConnection::handleError() {
 // 关闭连接
 void TcpConnection::shutdown() {
     if (state_ == kConnected) {
-        setState(kDisConnecting);
+        setState(kDisConnecting);       // 设置一下状态
         loop_->runInLoop(std::bind(&TcpConnection::shutdownInloop, this));
     }
 }
 
 void TcpConnection::shutdownInloop() {
-    // 如果没有关注写事件，说明已经是将发送缓冲区发送完了
+    // 如果没有关注写事件，说明已经是将发送缓冲区发送完了， 也就是shutdown保证能够将数据发送出去再关闭连接
     if (!channel_->isWriting()) {
         // 关闭写端
         socket_->shutDownWrite();
     }
 }
+
+void TcpConnection::shutdownRead() {
+    if (state_ == kConnected) {
+        setState(kDisConnecting);
+        socket_->shutDownRead();
+    }
+}
+

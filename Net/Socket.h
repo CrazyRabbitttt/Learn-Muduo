@@ -37,6 +37,8 @@ public:
     void setNoDelay(bool on);
 
     void shutDownWrite();
+
+    void shutDownRead();
 private:
     const int sockfd_;      //file descripter 
 };

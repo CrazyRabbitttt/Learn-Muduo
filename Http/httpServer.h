@@ -1,7 +1,7 @@
 #ifndef BING_HTTPSERVER_H
 #define BING_HTTPSERVER_H
 
-
+#include "Learn-Muduo/Base/CountDownLatch.h"
 #include "Learn-Muduo/Net/TcpServer.h"
 #include "Learn-Muduo/Http/httpRequest.h"
 #include "Learn-Muduo/Http/httpResponse.h"
@@ -52,7 +52,7 @@ class HttpServer {
  private:
     EventLoop* loop_;
     TcpServer server_;
-
+    CountDownLatch latch_;
     HttpResponseCallback response_callback_;
 
 };

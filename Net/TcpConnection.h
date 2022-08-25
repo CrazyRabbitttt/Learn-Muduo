@@ -50,6 +50,9 @@ public:
     // 关闭连接
     void shutdown();
 
+    // 关闭读端，用于HTTP短连接
+    void shutdownRead();
+
     // 设置回调函数
     void setConnectionCallBack(const ConnectionCallback& cb) { connectioncb_ = cb; }
     void setMessageCallBack(const MessageCallback& cb) { messagecb_ = cb; }

@@ -44,6 +44,12 @@ void Socket::shutDownWrite() {
     }
 }
 
+void Socket::shutDownRead() {
+    if (::shutdown(sockfd_, SHUT_RD) < 0) {
+        printf("shutdown read error: %d\n", sockfd_);
+    }
+}
+
 
 int Socket::accept(InetAddress* peeraddr) {
     //进行socket原语的封装  
