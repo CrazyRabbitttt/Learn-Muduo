@@ -72,7 +72,14 @@ namespace bing {
             //下面需要更换指针的位置
             retrieve(len);
             return res;
-        } 
+        }     
+
+        const char* findCRLF() const{
+            // 
+            // const char* result = std::search(peek(), beginwritePtr(), kCRLF, kCRLF + 2);
+            const char* crlf = std::search(peek(), beginwrite(), kCRLF, kCRLF+2);
+            return crlf == beginwrite() ? nullptr : crlf;
+        }
 
         // 目前已经读完到index了， 更新位置
         void retrieveUntilIdx(const char* index) {
@@ -121,6 +128,8 @@ namespace bing {
             return begin() + writeIdx_;
         }
 
+
+
         // 从fd上面读取数据
         ssize_t readFd(int fd, int* saveErrno);
 
@@ -158,6 +167,7 @@ namespace bing {
     std::vector<char> buffer_;      // 缓冲区，使用vector进行扩容操作
     size_t readIdx_;                // 可写区域的起始指针
     size_t writeIdx_;               // 可读区域的起始指针
+    static const char kCRLF[];
 
  };
 

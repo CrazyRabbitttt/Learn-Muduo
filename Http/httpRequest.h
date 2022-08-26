@@ -34,6 +34,10 @@ class HttpRequest {
     void ParseRequestLine(const char* start, const char* end, 
                         HttpRequestParseState& state);
 
+    bool ParseRequestLine(const char* start, const char* end);
+
+    bool ParseHeaders(const char* start, const char* colon, const char* end);
+
     void ParseHeaders(const char* start, const char* end,
                         HttpRequestParseState& state);
     

@@ -13,21 +13,18 @@ class HttpContent {
     HttpContent();
     ~HttpContent();
 
-    void ParseLine(Buffer* buffer);
     bool ParseContent(Buffer* buffer);
     bool GetCompleteRequest() { return parse_state_ == kParseGotCompleteRequest; }
 
     const HttpRequest& request() const { return request_; }
     void ResetContentState() {
         parse_state_ = kParseRequestLine;
-        line_state_  = kLineOK; 
     }
 
  private:
     int checked_idx_;
     HttpRequest request_;                       // http的请求
     HttpRequestParseState parse_state_;         // 主状态机
-    HttpRequestParseLine line_state_;           // 从状态机
 };
 
 }   // namespace bing

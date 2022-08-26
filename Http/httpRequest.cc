@@ -20,6 +20,59 @@ bool HttpRequest::ParseRequestMethod(const char* start, const char* end) {
   return has_method;
 }
 
+bool HttpRequest::ParseRequestLine(const char* start, const char* end) {
+  const char* space = nullptr;
+  space = std::find(start, end, ' ');
+  if (space == end) {
+    return false;
+  }
+
+  // 解析Method
+  if (!ParseRequestMethod(start, space)) {
+    return false;
+  }
+
+  start = space + 1;
+  space = std::find(space + 1, end, ' ');
+  if (space == end) {
+    return false;
+  }
+  const char* query_ptr = std::find(start, end, '?');
+  if (query_ptr != end) {
+    path_.assign(start, query_ptr);
+    query_.assign(query_ptr + 1, space);
+  } else {
+    path_.assign(start, space);
+  }
+  start = space + 1;
+  // 解析HTTP
+  bool parseHttp = (start + 8 == end) && std::equal(start, end - 1, http);
+  if (!parseHttp || (*(end - 1) != '0' && *(end - 1) != '1')) {
+    version_ = kUnknown;
+    return false;
+  }
+
+  if (*(end - 1) == '0') {
+    version_ = kHttp10;
+  } else {  
+    version_ = kHttp11;
+  } 
+
+  return true;
+}
+
+bool HttpRequest::ParseHeaders(const char* start, const char* colon, const char* end) {
+  // 传过来肯定是合法的？
+  const char* validstart = colon + 1;
+  while (*validstart == ' ') ++validstart;
+  hearders_[std::move(string(start, colon))] = std::move(string(validstart, end));
+  return true;
+}
+
+
+
+
+
 
 // GET /url/xxxx/xx.html HTTP/1.1
 void HttpRequest::ParseRequestLine(const char* start, const char* end, HttpRequestParseState& state)  {

@@ -12,16 +12,7 @@ enum HttpRequestParseState {
     kParseErrno,
 };
 
-// 从状态机的状态：一行解析成功、还要更多、解析错误（\r, \n提前出现等）
-
-enum HttpRequestParseLine {
-    kLineOK,
-    kLinemore, 
-    kLineError,
-};
-
-
-
+// 从状态机的状态：一行解析成功、还要更多、解析错误（\r, \n提前出现等）, 新版本不要从状态机了
 
 }   // namespace bing 
 

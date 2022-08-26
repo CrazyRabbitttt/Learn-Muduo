@@ -11,6 +11,8 @@ using namespace bing;
 buffer有大小，从tcp读取数据不知道多少？
 */
 
+const char Buffer::kCRLF[] = "\r\n";
+
 
 ssize_t Buffer::readFd(int fd, int* saveErrno) {
     char extrabuf[65535] = {0};     //栈空间，用来进行帮助读取数据
