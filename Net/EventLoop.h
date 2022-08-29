@@ -20,6 +20,25 @@ public:
 
     EventLoop();
     ~EventLoop();
+
+    // 下面是定时器部分
+    void RunAt(TimeStamp timestamp, Functor cb) {
+        timer_queue_->AddTimer(timestamp, std::move(cb), 0.0);  
+    }
+
+    void RunAfter(double wait_time, Functor cb) {
+        // 获得等待一段时间之后的时间戳
+        TimeStamp timestamp(TimeStamp::AddTime(TimeStamp::now(), wait_time));
+        RunAt(timestamp, std::move(cb));
+    }
+
+    void RunEvery(double interval, Functor cb) {
+        TimeStamp timestamp(TimeStamp::AddTime(TimeStamp::now(), interval));
+        timer_queue_->AddTimer(timestamp, std::move(cb), interval);
+    }
+
+
+
     // 执行事件循环
     void loop();
     //退出事件循环
@@ -70,11 +89,12 @@ private:
     bool looping_;
     bool quit_;
 
-    TimeStamp pollReturnTime_;                   //Epoller 返回发生事件的时间点  
+    TimeStamp pollReturnTime_;                  //Epoller 返回发生事件的时间点  
     std::unique_ptr<Channel> wakeupChannel_;    //标志：当前Loop是否有需要执行的回调操作
     std::vector<Functor> pendingFunctors_;      //loop需要执行的所有的回调函数
     MutexLock mutex_;                           //保护vector
-    std::unique_ptr<Poller> poller_;        //one loop, one poller 
+    std::unique_ptr<Poller> poller_;            //one loop, one poller 
+    std::unique_ptr<TimerQueue> timer_queue_;   
     ChannelList activeChannels_;
     const pid_t threadId_;          //线程标识
 

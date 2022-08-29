@@ -22,6 +22,14 @@ public:
 
     int64_t microSecond() const { return microSecondsSinceEpoll_; }
 
+    bool operator<(const TimeStamp& timestamp) const  {
+        return microSecondsSinceEpoll_ < timestamp.microSecond();
+    }
+
+    bool operator==(const TimeStamp& timestamp) const {
+        return microSecondsSinceEpoll_ == timestamp.microSecond();
+    }
+
 private:
     int64_t microSecondsSinceEpoll_;
 };
