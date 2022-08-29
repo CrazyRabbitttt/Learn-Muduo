@@ -8,7 +8,8 @@ using namespace bing;
 
 TimerQueue::TimerQueue(EventLoop* loop) 
     :loop_(loop), timerfd_(::timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK|TFD_CLOEXEC)), channel_(new Channel(loop, timerfd_))
-{
+{   
+    // InitChannel(loop, timerfd_);
     // 注册读事件
     channel_->setReadCallBack(std::bind(&TimerQueue::HandleRead, this));
     channel_->enableReading();
@@ -28,7 +29,7 @@ TimerQueue::~TimerQueue() {
 
 void TimerQueue::AddTimer(TimeStamp timestamp, BasicFunc&& cb, double interval) {
     // pass in : 超时时间戳，回调函数，时间间隔
-    Timer* timer = new Timer(timestamp, std::move(cb), interval);
+    Timer* timer(new Timer(timestamp, std::move(cb), interval));
     loop_->runInLoop(std::bind(&TimerQueue::AddTimerInloop, this, timer));
 }
 
@@ -57,7 +58,7 @@ void TimerQueue::ResetTimer(Timer* timer) {
     newtime.it_value.tv_nsec = static_cast<long>((seconds_diff % kMicroSecond2Second) * 1000);         // 毫秒的差距？
     int ret = ::timerfd_settime(timerfd_, 0, &newtime, &oldtime);
     assert(ret != -1);
-    // (void) ret;  ???????????
+    (void) ret;  
 }
 
 void TimerQueue::ResetTimers() {
@@ -113,12 +114,13 @@ void TimerQueue::HandleRead() {
     // 将timers中到期了的加入到activeTimers中， (添加到vec中的开始位置，src开始位置，src末尾位置) 当然是不包含end的，[)
     activeTimers_.insert(activeTimers_.end(), timers_.begin(), end);                    
 
+    // 将这些超时了的删除掉
+    timers_.erase(timers_.begin(), end);  
+
     for (const auto& it : activeTimers_) {
         it.second->Run();
-    }
+    }      
 
-    // 执行完回调了，将这些超时了的删除掉
-    timers_.erase(timers_.begin(), end);        
-
+    ResetTimers();      // 就是因为忘了这一步？·
 }
 

@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
 
     EventLoop mainloop;
     InetAddress addr(atoi(argv[1]));     // default 127.0.0.1
-    HttpServer server(&mainloop, addr);
+    HttpServer server(&mainloop, addr, true);
     server.setHttpResponseCallback(HttpResponseCallBack);
     server.start();
     mainloop.loop();   

@@ -1,6 +1,6 @@
 MAINSOURCE := Main.cc
 
-SOURCE := $(wildcard *.cc Base/*.cc Http/*.cc Net/*.cc)
+SOURCE := $(wildcard *.cc Base/*.cc Http/*.cc Net/*.cc Timer/*.cc)
 
 #反过滤，过滤不是main函数的文件
 override SOURCE := $(filter-out $(MAINSOURCE), $(SOURCE))	

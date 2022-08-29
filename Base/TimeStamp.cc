@@ -25,7 +25,7 @@ TimeStamp TimeStamp::AddTime(const TimeStamp& timestamp, double add_seconds) {
 
 
 std::string TimeStamp::toString() const {
-    char buf[128];
+    char buf[128] = {0};
     time_t nowSeconds = static_cast<time_t>(microSecondsSinceEpoll_ / kMicroSecond2Second);
     struct tm time;
     localtime_r(&nowSeconds, &time);

@@ -6,6 +6,7 @@
 #include "Learn-Muduo/Base/nocopyable.h"
 #include "Learn-Muduo/Net/Buffer.h"
 #include "Learn-Muduo/Http/httpContent.h"
+#include "Learn-Muduo/Base/TimeStamp.h"
 #include <memory>
 #include <atomic>
 
@@ -49,7 +50,7 @@ public:
 
     // 关闭连接
     void shutdown();
-
+    bool IsShutdown() const { return state_ == kDisConnecting; }
     // 关闭读端，用于HTTP短连接
     void shutdownRead();
 
@@ -69,6 +70,9 @@ public:
     // 进行连接的销毁
     void connectDestoryed();
 
+    TimeStamp timestamp() const { return timestamp_; }
+
+    void updateTimeStamp(TimeStamp now) { timestamp_ = now; }
 private:
     enum State{ kConnecting, kConnected, kdisConnected, kDisConnecting, };
 
@@ -80,6 +84,7 @@ private:
 
     void sendInloop(const void* data, size_t len);
     void shutdownInloop();
+
 
     void setState(State state) { state_ = state; }
     EventLoop* loop_;                               // sub loop, 进行TcpConnection的处理
@@ -97,6 +102,7 @@ private:
     WriteCompleteCallback writecompeletecb_;     
     HighWaterMarkCallback highWaterMarkcb_; 
 
+    TimeStamp timestamp_;                           // 最新一次传递消息的时间戳
     size_t highWaterMark_;                          // 水位线
 
     HttpContent content_;                           // 保存了对端的报文数据， 内部的话同样保存了请求和响应报文

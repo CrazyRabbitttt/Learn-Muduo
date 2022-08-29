@@ -29,6 +29,11 @@ class TimerQueue : nocopyable{
     using TimerSet     = std::set<TimerEntry>;
     using ActiveTimers = std::vector<TimerEntry>;
 
+   //  void InitChannel(EventLoop* loop, int timefd) {
+   //    Channel* channelptr = new Channel(loop, timefd);
+   //    channel_ = std::unique_ptr<Channel>(channelptr);
+   //  }
+
     void HandleRead();
 
     void ReadFromFd();

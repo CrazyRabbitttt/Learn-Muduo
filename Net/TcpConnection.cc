@@ -27,7 +27,8 @@ TcpConnection::TcpConnection(EventLoop* loop,
       channel_(new Channel(loop, sockfd)),
       localaddr_(localAddr),
       peeraddr_(peerAddr), 
-      highWaterMark_(64 * 1024 * 1024)
+      highWaterMark_(64 * 1024 * 1024),
+      timestamp_(TimeStamp::now())
     {
         //进行可读事件的回调， socket上的可读事件被触发了
         channel_->setReadCallBack(std::bind(&TcpConnection::handleRead, this, std::placeholders::_1));      //绑定，传送参数

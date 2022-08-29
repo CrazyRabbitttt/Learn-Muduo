@@ -12,16 +12,21 @@ namespace bing {
 
 class EventLoop;
 static const int kThreaNums = 4;
+static const int kIdleConnectionTimeOut = 10;        // 超时踢掉的时间
+
 
 class HttpServer {
     using HttpResponseCallback = std::function<void (const HttpRequest&, HttpResponse&)>;
  public:
-    HttpServer(EventLoop* loop, const InetAddress& addr);
+    HttpServer(EventLoop* loop, const InetAddress& addr, bool closeIdleConn);
     ~HttpServer();
 
     void start() {
         server_.start();
     }
+                            // weak ptr to judge if the connection alive
+    void HandleIdleConnection(std::weak_ptr<TcpConnection>& connection);
+
 
     void HttpDefaultCallback(const HttpRequest& request, HttpResponse& response)  {
         response.setStatusCode(k404NotFound);
@@ -33,18 +38,9 @@ class HttpServer {
         response_callback_ = std::move(cb);
     }
 
-
     void dealWithRequest(const HttpRequest& request, const TcpConnectionPtr& conn);
 
-
-    void ConnectionCallback(const TcpConnectionPtr& conn) {
-        if (conn->connected()) {
-            printf("%s -> %s state:online \n", conn->peerAddress().toIpPort().c_str(), conn->localAddress().toIpPort().c_str());
-        } else {
-            printf("%s -> %s state:offline \n", conn->peerAddress().toIpPort().c_str(), conn->localAddress().toIpPort().c_str());
-            // conn->shutdown();       // 也就是关闭连接
-        }
-    }
+    void ConnectionCallback(const TcpConnectionPtr& conn);
     
     // void MessageCallback(const TcpConnectionPtr& conn, Buffer* buffer, TimeStamp time);
     void MessageCallback(const TcpConnectionPtr& conn, Buffer* buffer, TimeStamp time);
@@ -52,7 +48,10 @@ class HttpServer {
  private:
     EventLoop* loop_;
     TcpServer server_;
-    CountDownLatch latch_;
+    // CountDownLatch latch_;
+
+    bool auto_close_idleconnection_;
+
     HttpResponseCallback response_callback_;
 
 };

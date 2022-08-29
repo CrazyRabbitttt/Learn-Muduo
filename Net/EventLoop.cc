@@ -44,6 +44,7 @@ EventLoop::EventLoop()
     :looping_(false), threadId_(currentThread::tid()), quit_(false), poller_(Poller::newDefaultPoller(this)) ,
         wakeupFd_(createEventfd()), 
         wakeupChannel_(new Channel(this, wakeupFd_)), 
+        timer_queue_(new TimerQueue(this)),
         callingPengdingChannel_(false)
 {
     if (t_LoopInThisThread) {       //不是0
