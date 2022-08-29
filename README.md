@@ -97,7 +97,90 @@
 >  我懵了，我还是太菜了😩
 
 
+### 性能测试(阿里云1核2G)
 
+
+
+### 本机5000并发60秒(21W), 4000并发100秒（29W）
+
+```shell
+root@iBing:~/Learn-Muduo/webbench# ./webbench -c 5000 -t 60 http://127.0.0.1:9090/index
+Webbench - Simple Web Benchmark 1.5
+Copyright (c) Radim Kolar 1997-2004, GPL Open Source Software.
+
+Benchmarking: GET http://127.0.0.1:9090/index
+5000 clients, running 60 sec.
+
+Speed=219350 pages/min, 7059511 bytes/sec.
+Requests: 219350 susceed, 0 failed.
+```
+
+> - 吃CPU：37， 7
+> - 成功的个数比较多，0 failed,应该是还没有写日志的原因
+
+
+
+### 带日志的网络上的服务器，16W，26W（800失败）
+
+```shell
+root@iBing:~/Learn-Muduo/webbench# ./webbench -c 5000 -t 60 http://127.0.0.1:9090/
+Webbench - Simple Web Benchmark 1.5
+Copyright (c) Radim Kolar 1997-2004, GPL Open Source Software.
+
+Benchmarking: GET http://127.0.0.1:9090/
+5000 clients, running 60 sec.
+
+Speed=169371 pages/min, 5561748 bytes/sec.
+Requests: 168879 susceed, 492 failed.
+```
+
+> 吃CPU ： 27， 3.5
+>
+> 可能是输出日志的工作占比是比较严重的
+
+
+
+### strace 进行比较
+
+> 4000并发 ➕ 运行10秒
+
+```shell
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 76.20    0.683423          13     51924           write
+  6.65    0.059615           5     12981           close
+  6.12    0.054881           4     12981           accept4
+  4.76    0.042659           2     25962           setsockopt
+  2.70    0.024252           2     12983           epoll_wait
+  2.22    0.019949           2     12981           getpeername
+  1.35    0.012137           2      6490           read
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.896916                136302           total
+```
+
+> 下面是我的
+
+```shell
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 79.27    0.998183          29     34378           write
+  6.19    0.077918           5     16261           close
+  6.11    0.076926           4     17189           accept4
+  4.81    0.060573           4     17239           epoll_wait
+  2.37    0.029840           2     17189           getsockname
+  1.24    0.015556           2      7579           read
+  0.02    0.000193           6        31           brk
+------ ----------- ----------- --------- --------- ----------------
+100.00    1.259189                109866           total
+~                                                                
+```
+
+#### 定时器的设计
+
+> - 基于小根堆进行设计，每次的`tick`时间都是距离超时时间最短的那个定时器的时间，这样就能够保证所有的定时器都能够被`tick`
+> - `timerfd` & `gettimeofday`, 使用超时文件描述符能够很好的契合`Reactor`模式进行事件的处理，`gettimeofday`精度很小，能够很好的适配定时器
+> - 为每一个连接`connection`创建 **时间戳：最近的更新时间**， 当有消息到达的时候更新这个值，那么`HandleIdleconnection`就不会将连接关闭
+> - 超时的时候触发读事件的回调函数，这时候 **将超时的timer进行回调函数的处理**， 然后将 **最小堆（按照超时时间戳进行排序）， 最近触发的定时器的时间作为时间间隔重新设置**
 
 
 
