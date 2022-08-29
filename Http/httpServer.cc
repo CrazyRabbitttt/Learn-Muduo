@@ -31,17 +31,11 @@ void HttpServer::MessageCallback(const TcpConnectionPtr& conn, Buffer* buffer, T
 }
 
 void HttpServer::dealWithRequest(const HttpRequest& request, const TcpConnectionPtr& conn) {
-    printf("Deal response\n");
     string connection_state = std::move(request.GetHeader("Connection"));
     bool close = (connection_state == "Close" ||
                 (request.version() == kHttp10 && 
                  connection_state != "Keep-Alive"));
-    printf("Version:%d, State:%s\n", request.version(), connection_state.c_str());
-    if (close) {printf("Not long connection\n"); }
-    else {
-        printf("Is Long connection\n");
-    }
-    HttpResponse response(close);
+    HttpResponse response(close);                           // make the response, 
     response_callback_(request, response);
     Buffer buffer;
     response.AppendToBuffer(&buffer);

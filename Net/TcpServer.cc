@@ -55,8 +55,6 @@ void TcpServer::removeConnection(const TcpConnectionPtr& conn) {
 }
 
 void TcpServer::removeConnectionInLoop(const TcpConnectionPtr& conn) {
-    printf("TcpServer::removeConnectionInLoop [%s] - connection %s \n",
-             name_.c_str(), conn->name().c_str());
     connections_.erase(conn->name());      //从map中删除掉
     // 获得conn所在的loop
     EventLoop* ioLoop_ =  conn->getLoop();

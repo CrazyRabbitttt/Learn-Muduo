@@ -2,8 +2,11 @@
 #define BING_BASE_TIMESTAMP_H
 
 #include <iostream>
+#include <sys/time.h>
 
 namespace bing {
+
+const int kMicroSecond2Second = 1000 * 1000;
 
 class TimeStamp {
 public:
@@ -11,14 +14,18 @@ public:
 
     TimeStamp();
 
-    static TimeStamp now();
+    static TimeStamp now();                 // will be directly used by extern file 
+
+    static TimeStamp AddTime(const TimeStamp& timestamp, double add_seconds);
 
     std::string toString() const;
 
+    int64_t microSecond() const { return microSecondsSinceEpoll_; }
 
 private:
     int64_t microSecondsSinceEpoll_;
 };
+
 
 
 }       //namespace bing

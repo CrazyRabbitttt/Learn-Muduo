@@ -33,7 +33,6 @@ bool HttpContent::ParseContent(Buffer* buffer) {
             }
             
         } else if (parse_state_ == kParseRequestHeader) {
-            printf("parse headers\n");
             crlf = buffer->findCRLF();
             if (crlf) {
                 const char* colon = std::find(buffer->peek(), crlf, ':');

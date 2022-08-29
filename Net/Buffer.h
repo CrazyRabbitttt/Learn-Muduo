@@ -141,7 +141,7 @@ namespace bing {
   private:
     //获得vector的指针
     char* begin() {
-        return & (*buffer_.begin());
+        return &*buffer_.begin();
     }
 
     const char* begin() const {

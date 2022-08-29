@@ -131,7 +131,8 @@ void TcpConnection::handleWrite() {
                 //     loop_->queueInLoop(std::bind(writecompeletecb_, shared_from_this()));
                 // }
                 if (state_ == kDisConnecting) {
-                    shutdownInloop();
+                    printf("shut down in handlewrite\n");
+                    shutdownInloop();   
                 }
             }
         } else {

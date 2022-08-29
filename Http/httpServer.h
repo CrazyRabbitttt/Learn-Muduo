@@ -11,7 +11,7 @@
 namespace bing {
 
 class EventLoop;
-static const int kThreaNums = 8;
+static const int kThreaNums = 4;
 
 class HttpServer {
     using HttpResponseCallback = std::function<void (const HttpRequest&, HttpResponse&)>;
@@ -42,7 +42,7 @@ class HttpServer {
             printf("%s -> %s state:online \n", conn->peerAddress().toIpPort().c_str(), conn->localAddress().toIpPort().c_str());
         } else {
             printf("%s -> %s state:offline \n", conn->peerAddress().toIpPort().c_str(), conn->localAddress().toIpPort().c_str());
-            conn->shutdown();       // 也就是关闭连接
+            // conn->shutdown();       // 也就是关闭连接
         }
     }
     

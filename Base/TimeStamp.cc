@@ -12,15 +12,26 @@ TimeStamp::TimeStamp(int64_t microSecondsSinceEpoll)
     {}
 
 TimeStamp TimeStamp::now() {
-    return TimeStamp(time(NULL));       //Return now 
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    return TimeStamp(time.tv_sec * kMicroSecond2Second + time.tv_usec);         // 单位是微秒
 }
 
+TimeStamp TimeStamp::AddTime(const TimeStamp& timestamp, double add_seconds) {
+    // 增加时间，单位是微秒
+    int64_t addSeconds = static_cast<int64_t>(add_seconds) * kMicroSecond2Second;
+    return TimeStamp(timestamp.microSecond() + addSeconds);
+}
+
+
 std::string TimeStamp::toString() const {
-    char buf[128] = {0};
-    struct tm *tm_time = localtime(&microSecondsSinceEpoll_);
-    snprintf(buf, sizeof (buf), "%4d%02d%02d %02d:%02d:%02d",
-			 tm_time->tm_year + 1900, tm_time->tm_mon + 1, tm_time->tm_mday,
-			 tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec);
+    char buf[128];
+    time_t nowSeconds = static_cast<time_t>(microSecondsSinceEpoll_ / kMicroSecond2Second);
+    struct tm time;
+    localtime_r(&nowSeconds, &time);
+    int64_t nowMicroSecond = microSecondsSinceEpoll_ % kMicroSecond2Second;
+    snprintf(buf, sizeof buf, "%4d%02d%02d %02d:%02d:%02d.%06d",
+        1900+time.tm_year, time.tm_mon + 1, time.tm_mday, time.tm_hour, time.tm_min, time.tm_sec, nowMicroSecond);
     return buf;
 }
 
