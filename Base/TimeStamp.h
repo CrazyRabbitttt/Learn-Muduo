@@ -6,10 +6,12 @@
 
 namespace bing {
 
-const int kMicroSecond2Second = 1000 * 1000;
 
 class TimeStamp {
 public:
+
+    static const int kMicroSecond2Second = 1000 * 1000;
+
     explicit TimeStamp(int64_t microSecondsSinceEpoll);
 
     TimeStamp();

@@ -1,13 +1,12 @@
 MAINSOURCE := Main.cc
 
-SOURCE := $(wildcard *.cc Base/*.cc Http/*.cc Net/*.cc Timer/*.cc)
+SOURCE := $(wildcard *.cc Base/*.cc Http/*.cc Net/*.cc Timer/*.cc Log/*.cc )
 
 #反过滤，过滤不是main函数的文件
 override SOURCE := $(filter-out $(MAINSOURCE), $(SOURCE))	
 
 #patsubst: 进行模式的替换
 OBJS   := $(patsubst %.cc, %.o, $(SOURCE))		#将.cc -> .o
-
 
 TARGET  := MyMuduo 
 CC 	:= g++

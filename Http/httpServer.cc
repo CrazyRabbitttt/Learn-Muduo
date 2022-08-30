@@ -3,6 +3,7 @@
 #include "Learn-Muduo/Net/TcpServer.h"
 #include "Learn-Muduo/Net/EventLoop.h"
 #include "Learn-Muduo/Net/TcpConnection.h"
+#include "Learn-Muduo/Log/logstream.h"
 #include <functional>
 
 using namespace bing;
@@ -14,7 +15,7 @@ HttpServer::HttpServer(EventLoop* loop, const InetAddress& address, bool closeId
     server_.setMessageCallback(std::bind(&HttpServer::MessageCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     server_.setThreadNum(kThreaNums);
     setHttpResponseCallback(std::bind(&HttpServer::HttpDefaultCallback, this, std::placeholders::_1, std::placeholders::_2));
-
+    LOG_INFO << "HttpServer Running...";
 }    
 HttpServer::~HttpServer() {}
 
@@ -50,11 +51,13 @@ void HttpServer::HandleIdleConnection(std::weak_ptr<TcpConnection>& connection) 
 
 void HttpServer::ConnectionCallback(const TcpConnectionPtr& conn) {
     if (conn->connected()) {
+        // LOG_INFO << TimeStamp::now().toString() << " " << conn->peerAddress().toIpPort() << " -> " << conn->localAddress().toIpPort() << " state:online "; 
         printf("%s  %s -> %s state:online \n", TimeStamp::now().toString().c_str(), conn->peerAddress().toIpPort().c_str(), conn->localAddress().toIpPort().c_str());
         if (auto_close_idleconnection_) {
             loop_->RunAfter(kIdleConnectionTimeOut, std::bind(&HttpServer::HandleIdleConnection, this, std::weak_ptr<TcpConnection>(conn)));
         }    
     } else {
+        // LOG_INFO << TimeStamp::now().toString() << " " << conn->peerAddress().toIpPort() << " -> " << conn->localAddress().toIpPort() << " state:offline "; 
         printf("%s  %s -> %s state:offline \n", TimeStamp::now().toString().c_str(), conn->peerAddress().toIpPort().c_str(), conn->localAddress().toIpPort().c_str());
             // conn->shutdown();       // 也就是关闭连接
     }
