@@ -71,7 +71,7 @@ Logger::Logger(SourceFile file, int line, LogLevel level)
 Logger::Logger(SourceFile file, int line, LogLevel level, const char* func_name)
     : impl_(level, file, line) 
 {
-    impl_.logstream_ << func_name << ' ';   // 将funcname 存放到buffer中
+    impl_.logstream_ << "(" << func_name << "):";   // 将funcname 存放到buffer中
 }    
 
 
@@ -121,6 +121,6 @@ void Logger::Impl::forattedTime() {
 // 获得当前线程的ID
 void Logger::Impl::getThreadID() {
     char buf[32] = {0};
-    int len = snprintf(buf, sizeof (buf), "%5lu", ::syscall(SYS_gettid));
+    int len = snprintf(buf, sizeof (buf), "[%5lu]", ::syscall(SYS_gettid));
     logstream_ << Tmp(buf, len);
 }

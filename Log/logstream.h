@@ -167,8 +167,10 @@ class LogStream {
     self &operator<<(const char* str) {
         if (str) {          // sizeof 不能获得动态分配的存储空间的大小，这里用sizeof 的话就是指针的大小了 ： 8
             buffer_.append(str, static_cast<int>(strlen(str)));
+            return *this;
         } else {
             buffer_.append("(null)", 6);
+            return *this;
         }
     }
     self &operator<<(const unsigned char* v) {

@@ -1,7 +1,6 @@
-epoll_wait(4, [{EPOLLIN, {u32=3369003048, u64=94441109907496}}], 16, 5000) = 1
-accept4(5, {sa_family=AF_INET, sin_port=htons(42416), sin_addr=inet_addr("127.0.0.1")}, [16], SOCK_NONBLOCK) = 14
-getsockname(14, {sa_family=AF_INET, sin_port=htons(9090), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
-write(1, "Run in loop\n", 12)           = 12
-write(1, "not in thread..\n", 16)       = 16
-write(6, "\1\0\0\0\0\0\0\0", 8)         = ?
+epoll_wait(4, [], 16, 5000)             = 0
+epoll_wait(4, [{EPOLLIN, {u32=2892556664, u64=94071266273656}}], 16, 5000) = 1
+accept4(6, {sa_family=AF_INET, sin_port=htons(35330), sin_addr=inet_addr("127.0.0.1")}, [16], SOCK_NONBLOCK) = 21
+getsockname(21, {sa_family=AF_INET, sin_port=htons(9090), sin_addr=inet_addr("127.0.0.1")}, [16]) = 0
+write(7, "\1\0\0\0\0\0\0\0", 8)         = ?
 +++ killed by SIGSEGV +++
