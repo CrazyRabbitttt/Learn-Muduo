@@ -21,13 +21,14 @@ class AsyncLogging : nocopyable {
     using BufferPtr = BufferVector::value_type;
 
  public:
-    AsyncLogging(int flush_interval = 500, int rollsize = 20 * 1024 * 1024);
+    AsyncLogging(int flush_interval, int rollsize);
     ~AsyncLogging() {
         if (running_) {
             stop();
         }
     }
 
+    // 将日志消息写入到后端的接口
     void append(const char* buf, int len);
 
     void start() {
@@ -40,11 +41,13 @@ class AsyncLogging : nocopyable {
         running_ = false;
         cond_.notify();                     // 通知一下，结束了
         thread_.join();                     // 等待线程结束
+    }   
+    void setLogName(const std::string& logname) {
+        filename_ = std::move(logname);
     }
 
  private:
     void writeThread();
-
     const int flush_interval_;                  // 定时缓冲的时间
     const int roll_size_;                       // 缓冲额定空间
     std::atomic<bool> running_;                 // 
@@ -57,7 +60,7 @@ class AsyncLogging : nocopyable {
     // std::mutex mutex_;                          
     // std::condition_variable cond_;  
 
-
+    std::string filename_;                      // 指定的filename 
 
     BufferPtr current_buffer_;                  // 当前缓冲区
     BufferPtr next_buffer_;                     // 预备缓冲区

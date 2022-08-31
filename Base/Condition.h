@@ -4,6 +4,7 @@
 #include "Learn-Muduo/Base/Mutex.h"
 
 #include <pthread.h>
+#include <stdint.h>
 #include <sys/time.h>
 #include <errno.h>
 
@@ -35,7 +36,12 @@ class Condition {
     bool waitForSeconds(double seconds) {
         struct timespec abstime;
         clock_gettime(CLOCK_REALTIME, &abstime);
-        abstime.tv_sec += static_cast<time_t>(seconds);
+        const int64_t kNanoSeconds = 1000000000;
+        int64_t nanoseconds = static_cast<int64_t>(seconds * kNanoSeconds);
+
+        abstime.tv_sec += static_cast<time_t>((abstime.tv_nsec + nanoseconds) / kNanoSeconds);
+        abstime.tv_nsec = static_cast<long>((abstime.tv_nsec + nanoseconds) % kNanoSeconds);
+
         return ETIMEDOUT == pthread_cond_timedwait(&cond_, mutex_.getPthreadLock(), &abstime);
     }
 

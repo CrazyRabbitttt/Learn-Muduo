@@ -3,11 +3,20 @@
 #include "Learn-Muduo/Net/InetAddress.h"
 #include "Learn-Muduo/Http/httpServer.h"
 #include "Learn-Muduo/Http/httpSourceFile.h"
+#include "Learn-Muduo/Log/asynclogging.h"
+#include "Learn-Muduo/Log/logger.h"
 
-#include <string>
+#include <memory>
 
 using namespace bing;
 
+std::unique_ptr<AsyncLogging> asyncLog;     // 异步日志的前后端？
+
+extern void setOutputFunc(Logger::OutputFunc);
+
+void asyncOutputFunc(const LogStream::Buffer& buffer) {
+    asyncLog->append(buffer.data(), buffer.len());
+}
 
 void HttpResponseCallBack(const HttpRequest& request, HttpResponse& response) {
     // 进行资源的分发处理
@@ -58,10 +67,23 @@ int main(int argc, char** argv) {
     //             break;
     //     }
     // }
+    std::string tmp("");
     if (argc <= 1) {
-        printf("Usage: %s portname\n", argv[0]);
+        printf("Usage: %s portname [logpath]\n", argv[0]);
         return 0;
+    } else if (argc == 2) {
+        printf("Use the default logPath as you dont setted it.\n");
+    } else if (argc == 3){
+        printf("argv1:");
+        std::cout << argv[1];
+        tmp = std::move(string(argv[2]));
     }
+    
+    asyncLog.reset(new AsyncLogging(3, 2 * 1024 * 1024));       // 滚动时间3秒，滚动大小2M
+    asyncLog->setLogName(tmp);  
+    setOutputFunc(asyncOutputFunc);                             // 调用异步写线程类的append
+    asyncLog->start();                                          // 开启异步写的后端线程
+
 
     EventLoop mainloop;
     InetAddress addr(atoi(argv[1]));     // default 127.0.0.1

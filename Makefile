@@ -37,6 +37,7 @@ clean   :
 			find ./Net/ -name "*.o"  | xargs rm -f
 			find ./Test/ -name "*.o" | xargs rm -f	
 			find ./Http -name  "*.o" | xargs rm -f
+			find ./Log  -name  "*.o" | xargs rm -f
 
 
 $(WebV1) : $(OBJS) Main.o

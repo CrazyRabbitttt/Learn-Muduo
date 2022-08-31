@@ -45,7 +45,7 @@ class Logger {
     // 输出方法的回调, 传入buffer, 默认输出到stdout 中
     using OutputFunc = std::function<void(const LogStream::Buffer &)>;
 
-    static void setOutputFunc(OutputFunc func);
+    // static void setOutputFunc(OutputFunc func);
 
     // 内部类：日志消息的格式？？
     class Impl {
@@ -61,37 +61,34 @@ class Logger {
 
         LogLevel  level_;       // 日志的等级
         LogStream logstream_;   // 输出流，用本输出流进行输出Log
-        TimeStamp time_;          // 时间
+        TimeStamp time_;        // 时间
         SourceFile file_;       // 文件
         int line_;              // 当前行
     };
 
  private:
     Impl impl_;                 // Impl 对象
+    static bool isAsync_;       // 是否是采用异步的日志
 };
 
-    // // 当前的日志级别
-    // extern Logger::LogLevel g_log_level;        
-
-    // // 返回当前日志级别
-    // inline Logger::LogLevel Logger::loglevel() {
-    //     return g_log_level;
-    // }
-
-
-#define LOG_INFO                                \   
-    if (loglevel() <= Logger::INFO)     \
-    (Logger(__FILE__, __LINE__, Logger::INFO, __func__).stream())
-
-
 }   // namespace bing 
+
+
 
 
 // 全局的函数
 bing::Logger::LogLevel loglevel();
 
 void setLogLevel(bing::Logger::LogLevel level);
+void setOutputFunc(bing::Logger::OutputFunc func);
 
+#define SET_LOGLEVEL(x) setLogLevel(x);
 
+#define LOG_INFO                                \   
+    if (loglevel() <= Logger::INFO)             \
+    (Logger(__FILE__, __LINE__, bing::Logger::INFO, __func__).stream())
+
+#define LOG_WARN Logger(__FILE__, __LINE__, bing::Logger::WARN, __func__).stream()
+#define LOG_ERROR Logger(__FILE__, __LINE__, bing::Logger::ERROR, __func__).stream()
 
 #endif

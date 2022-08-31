@@ -16,8 +16,6 @@ const char* LogLevelName[5] = {
         "FATAL ",
 };
 
-
-
 void defaultOutPut(const LogStream::Buffer& buffer) {
     // 将buffer 写到标准输出中去
     size_t n = fwrite(buffer.data(), 1, static_cast<int>(buffer.len()), stdout);       // 
@@ -25,12 +23,17 @@ void defaultOutPut(const LogStream::Buffer& buffer) {
     (void) n;
 }
 
+void defaultFlush() {
+    fflush(stdout);
+}
+
 
 // 全局的方法： 输出方法的回调，初始化是默认的标准输出
 Logger::OutputFunc g_output_func = defaultOutPut;
 Logger::LogLevel g_log_level = Logger::INFO;
+bool g_is_async = false;
 
-void Logger::setOutputFunc(OutputFunc func) {
+void setOutputFunc(bing::Logger::OutputFunc func) {
     g_output_func = func;
 }
 
@@ -56,6 +59,7 @@ inline LogStream& operator<<(LogStream& s, Tmp v) {
     return s;
 }
 
+// 重载输出file运算，
 inline LogStream& operator<<(LogStream& s, Logger::SourceFile v) {
     s.append(v.file_, v.size_);
     return s;
@@ -107,7 +111,7 @@ void Logger::Impl::forattedTime() {
     localtime_r(&seconds, &tm_time);
     char t_time[64] = {0};
     snprintf(t_time, sizeof(t_time), "%04d-%02d-%02d %02d:%02d:%02d", tm_time.tm_year + 1900,
-        tm_time.tm_mon + 1, tm_time.tm_mday, tm_time.tm_hour + 8, tm_time.tm_min,
+        tm_time.tm_mon + 1, tm_time.tm_mday, tm_time.tm_hour , tm_time.tm_min,
         tm_time.tm_sec);
     
     // 将毫秒拼接上

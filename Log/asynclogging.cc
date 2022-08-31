@@ -10,7 +10,7 @@ using namespace bing;
 AsyncLogging::AsyncLogging(int flush_interval, int rollsize)
     :flush_interval_(flush_interval), 
     roll_size_(rollsize),
-    running_(false),
+    running_(false),            // 开启异步写日志的线程
     thread_(std::bind(&AsyncLogging::writeThread, this), "AsyncLogging Thread"), 
     mutex_(),
     cond_(mutex_),
@@ -32,17 +32,16 @@ void AsyncLogging::append(const char* buf, int len) {
     if (current_buffer_->avial()) {
         // 内部会自动判断够不够的
         current_buffer_->append(buf, len);
-    } else {                                // buffer满了，通知日志线程可写
-        buffers_.push_back(std::move(current_buffer_));
+    } else {                                                // buffer满了，通知日志线程可写
+        buffers_.push_back(std::move(current_buffer_));     // 将满了的buffer添加到buffers中
         if (next_buffer_) {
-            current_buffer_ = std::move(next_buffer_);      // 移动语意
+            current_buffer_ = std::move(next_buffer_);      // 移动语意, 减少拷贝的消耗
         } else {
             // 写入的太快了，缓冲区都满了，申请一个新的
             current_buffer_.reset(new Buffer);              // unique_ptr, 抛弃原来的，生成新的
         }
         // 更换完buffer之后将数据写入
         current_buffer_->append(buf, len);
-
         // 通知日志线程有数据可写（缓冲区满了才通知）
         cond_.notify();
     }
@@ -63,7 +62,9 @@ void AsyncLogging::writeThread() {
     BufferVector buffers_to_write;
     buffers_to_write.reserve(8);
 
-    LogFile output(roll_size_);             // LogFile 
+
+    // 后端写日志的线程创建这个LogFile 
+    LogFile output(roll_size_, filename_);             // LogFile      
 
     while (running_) {
         // 临界区
@@ -73,7 +74,6 @@ void AsyncLogging::writeThread() {
                 // 如果没人唤醒的话，等待指定的时间
                 cond_.waitForSeconds(flush_interval_);      
             }
-
             buffers_.push_back(std::move(current_buffer_));         // 将前端的拿到里面
             current_buffer_ = std::move(new_buffer1);               // 前端的current替换为没用过的buffer
 
