@@ -2,6 +2,7 @@
 #include "Learn-Muduo/Net/Socket.h"
 #include "Learn-Muduo/Net/Channel.h"
 #include "Learn-Muduo/Net/EventLoop.h"
+#include "Learn-Muduo/Log/logger.h"
 
 using namespace bing;
 
@@ -86,7 +87,7 @@ void TcpConnection::send(const string& message) {
             remain -= send_size;
         } else {
             if (errno != EWOULDBLOCK) {
-                printf("TcpConnection::Send write failed\n");
+                LOG_ERROR << "Write Faild";
             }
             return ;
         }
@@ -97,7 +98,6 @@ void TcpConnection::send(const string& message) {
         // 将剩余的数据写入buffer中, 要注意添加到之前还剩余的数据的后面
         outputBuffer_.append((char*)message.c_str() + send_size, remain);
         if (!channel_->isWriting()) {   // 如果没有关注写的事件
-            printf("数据没发送完，放到buffer中，注册写事件\n");
             channel_->enableWriting();  // 注册写事件
         }
     }
@@ -117,7 +117,6 @@ void TcpConnection::handleWrite() {
     // 如果关注了写事件
     if (channel_->isWriting()) {        // 前提肯定是需要关注了写的事件啦
         int saveErrno = 0;
-        printf("触发了写事件，将缓冲区的内容写到对端\n");
         ssize_t n = outputBuffer_.writeFd(channel_->fd(), &saveErrno);
         if (n > 0) {    
             // 写成功了， 更新一下缓冲区的指针
@@ -132,13 +131,12 @@ void TcpConnection::handleWrite() {
                 //     loop_->queueInLoop(std::bind(writecompeletecb_, shared_from_this()));
                 // }
                 if (state_ == kDisConnecting) {
-                    printf("shut down in handlewrite\n");
                     shutdownInloop();   
                 }
             }
         } else {
             // 写出错， 
-            printf("TcpConnection::hanldWrite error\n");
+            LOG_ERROR << "handleWrite error";
         }
     } else {
         // 没有关注写事件

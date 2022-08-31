@@ -10,13 +10,13 @@
 
 using namespace bing;
 
-std::unique_ptr<AsyncLogging> asyncLog;     // 异步日志的前后端？
+// std::unique_ptr<AsyncLogging> asyncLog;     // 异步日志的前后端？
 
-extern void setOutputFunc(Logger::OutputFunc);
+// extern void setOutputFunc(Logger::OutputFunc);
 
-void asyncOutputFunc(const LogStream::Buffer& buffer) {
-    asyncLog->append(buffer.data(), buffer.len());
-}
+// void asyncOutputFunc(const LogStream::Buffer& buffer) {
+//     asyncLog->append(buffer.data(), buffer.len());
+// }
 
 void HttpResponseCallBack(const HttpRequest& request, HttpResponse& response) {
     // 进行资源的分发处理
@@ -79,10 +79,10 @@ int main(int argc, char** argv) {
         tmp = std::move(string(argv[2]));
     }
     
-    asyncLog.reset(new AsyncLogging(3, 2 * 1024 * 1024));       // 滚动时间3秒，滚动大小2M
-    asyncLog->setLogName(tmp);  
-    setOutputFunc(asyncOutputFunc);                             // 调用异步写线程类的append
-    asyncLog->start();                                          // 开启异步写的后端线程
+    // asyncLog.reset(new AsyncLogging(3, 2 * 1024 * 1024));       // 滚动时间3秒，滚动大小2M
+    // asyncLog->setLogName(tmp);  
+    // setOutputFunc(asyncOutputFunc);                             // 调用异步写线程类的append
+    // asyncLog->start();                                          // 开启异步写的后端线程
 
 
     EventLoop mainloop;

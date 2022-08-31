@@ -1,5 +1,6 @@
 #include "Learn-Muduo/Net/Socket.h"
 #include "Learn-Muduo/Net/InetAddress.h"
+#include "Learn-Muduo/Log/logger.h"
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -27,20 +28,21 @@ Socket::~Socket() {
 
 void Socket::listen() {
     if (::listen(sockfd_, 1024) < 0) {
-        printf("listen sockfd faild: %d\n", sockfd_);
+        LOG_ERROR << "listen sockfd faild:" << sockfd_;
     }
 }
 
 void Socket::bindAddr(const InetAddress& localaddr) {
     if (::bind(sockfd_, (sockaddr*)localaddr.getSockAddr(), sizeof (sockaddr_in)) < 0) {
         printf("bind sockfd:%d error, May be Address in use.\n", sockfd_);
+        LOG_ERROR << "bind sockfd:" << sockfd_ <<  "error, May be Address in use.";
     }
 }
 
 void Socket::shutDownWrite() {
     //将写端进行关闭
     if (::shutdown(sockfd_, SHUT_WR) < 0) {
-        printf("shutdown write error: %d\n", sockfd_);
+        LOG_ERROR << "shutdown write error" << sockfd_;
     }
 }
 
