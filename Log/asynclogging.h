@@ -2,11 +2,11 @@
 
 // 前端写日志的操作API， 有两个缓冲区
 
-#include "Learn-Muduo/Log/logstream.h"
-#include "Learn-Muduo/Base/Mutex.h"
-#include "Learn-Muduo/Base/Thread.h"
-#include "Learn-Muduo/Base/CountDownLatch.h"
-#include "Learn-Muduo/Base/nocopyable.h"
+#include "logstream.h"
+#include "Mutex.h"
+#include "Thread.h"
+#include "CountDownLatch.h"
+#include "nocopyable.h"
 
 #include <vector>
 #include <memory>

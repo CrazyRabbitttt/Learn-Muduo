@@ -1,7 +1,7 @@
 #ifndef BING_BASE_CONDITION_H
 #define BING_BASE_CONDITION_H
 
-#include "Learn-Muduo/Base/Mutex.h"
+#include "Mutex.h"
 
 #include <pthread.h>
 #include <stdint.h>

@@ -1,3 +1,0 @@
-2022-08-31 21:35:29.692[18396]INFO  httpServer.cc:18->(HttpServer):HttpServer begin Running...
-2022-08-31 21:35:41.175[18398]INFO  httpServer.cc:54->(ConnectionCallback):127.0.0.1:50624 -> 127.0.0.1:9090 state:online
-2022-08-31 21:35:46.482[18398]INFO  httpServer.cc:59->(ConnectionCallback):127.0.0.1:50624 -> 127.0.0.1:9090 state:offline

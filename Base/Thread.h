@@ -1,8 +1,8 @@
 #ifndef BING_BASE_THREAD_H
 #define BING_BASE_THREAD_H
 
-#include "Learn-Muduo/Base/nocopyable.h"
-#include "Learn-Muduo/Base/CountDownLatch.h"
+#include "nocopyable.h"
+#include "CountDownLatch.h"
 
 
 #include <functional>

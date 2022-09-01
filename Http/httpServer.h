@@ -1,11 +1,11 @@
 #ifndef BING_HTTPSERVER_H
 #define BING_HTTPSERVER_H
 
-#include "Learn-Muduo/Base/CountDownLatch.h"
-#include "Learn-Muduo/Net/TcpServer.h"
-#include "Learn-Muduo/Http/httpRequest.h"
-#include "Learn-Muduo/Http/httpResponse.h"
-#include "Learn-Muduo/Log/logger.h"
+#include "CountDownLatch.h"
+#include "TcpServer.h"
+#include "httpRequest.h"
+#include "httpResponse.h"
+#include "logger.h"
 
 
 namespace bing {

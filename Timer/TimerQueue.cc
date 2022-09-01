@@ -1,6 +1,6 @@
-#include "Learn-Muduo/Timer/TimerQueue.h"
-#include "Learn-Muduo/Net/EventLoop.h"
-#include "Learn-Muduo/Net/Channel.h"
+#include "TimerQueue.h"
+#include "EventLoop.h"
+#include "Channel.h"
 
 #include <sys/timerfd.h>
 #include <assert.h>

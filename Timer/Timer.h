@@ -1,8 +1,8 @@
 #ifndef BING_TIMER_H
 #define BING_TIMER_H
 
-#include "Learn-Muduo/Base/nocopyable.h"
-#include "Learn-Muduo/Base/TimeStamp.h"
+#include "nocopyable.h"
+#include "TimeStamp.h"
 
 #include <functional>
 

@@ -1,8 +1,8 @@
 #ifndef BING_HTTPCONTENT_H
 #define BING_HTTPCONTENT_H
 
-#include "Learn-Muduo/Http/httpRequest.h"
-#include "Learn-Muduo/Http/httpResponse.h"
+#include "httpRequest.h"
+#include "httpResponse.h"
 #include <string.h>
 
 namespace bing {

@@ -1,8 +1,8 @@
 #ifndef BING_NET_ACCEPTER_H
 #define BING_NET_ACCEPTER_H
-#include "Learn-Muduo/Base/nocopyable.h"
-#include "Learn-Muduo/Net/Channel.h"
-#include "Learn-Muduo/Net/Socket.h"
+#include "nocopyable.h"
+#include "Channel.h"
+#include "Socket.h"
 
 
 namespace bing {

@@ -1,8 +1,8 @@
 #ifndef BING_LOG_LOGGER_H
 #define BING_LOG_LOGGER_H
 
-#include "Learn-Muduo/Log/logstream.h"
-#include "Learn-Muduo/Base/TimeStamp.h"
+#include "logstream.h"
+#include "TimeStamp.h"
 #include <functional>
 #include <string.h>
 

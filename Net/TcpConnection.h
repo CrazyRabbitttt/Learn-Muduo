@@ -1,12 +1,12 @@
 #ifndef BING_NET_TCPCONNECTION_H
 #define BING_NET_TCPCONNECTION_H
 
-#include "Learn-Muduo/Net/InetAddress.h"
-#include "Learn-Muduo/Net/Callback.h"
-#include "Learn-Muduo/Base/nocopyable.h"
-#include "Learn-Muduo/Net/Buffer.h"
-#include "Learn-Muduo/Http/httpContent.h"
-#include "Learn-Muduo/Base/TimeStamp.h"
+#include "InetAddress.h"
+#include "Callback.h"
+#include "nocopyable.h"
+#include "Buffer.h"
+#include "httpContent.h"
+#include "TimeStamp.h"
 #include <memory>
 #include <atomic>
 

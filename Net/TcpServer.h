@@ -1,9 +1,9 @@
 #ifndef BING_NET_TCPSERVER_H
 #define BING_NET_TCPSERVER_H
-#include "Learn-Muduo/Base/nocopyable.h"
-#include "Learn-Muduo/Net/Callback.h"
-#include "Learn-Muduo/Net/InetAddress.h"
-#include "Learn-Muduo/Net/TcpConnection.h"
+#include "nocopyable.h"
+#include "Callback.h"
+#include "InetAddress.h"
+#include "TcpConnection.h"
 #include <unordered_map>
 #include <atomic>
 namespace bing {

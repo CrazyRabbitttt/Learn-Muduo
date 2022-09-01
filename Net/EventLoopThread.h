@@ -1,10 +1,10 @@
 #ifndef BING_NET_EVENTLOOPTHREAD_H
 #define BING_NET_EVENTLOOPTHREAD_H
 
-#include "Learn-Muduo/Base/nocopyable.h"
-#include "Learn-Muduo/Base/Mutex.h"
-#include "Learn-Muduo/Base/Condition.h"
-#include "Learn-Muduo/Base/Thread.h"
+#include "nocopyable.h"
+#include "Mutex.h"
+#include "Condition.h"
+#include "Thread.h"
 
 namespace bing {
 

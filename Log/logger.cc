@@ -1,5 +1,5 @@
-#include "Learn-Muduo/Log/logger.h"
-#include "Learn-Muduo/Base/TimeStamp.h"
+#include "logger.h"
+#include "TimeStamp.h"
 
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -103,8 +103,8 @@ Logger::Impl::Impl(LogLevel level, const SourceFile& file, int line)
 
 
 void Logger::Impl::forattedTime() {
-    time_t seconds = static_cast<time_t>(time_.microSecond() / TimeStamp::kMicroSecond2Second);
-    time_t microSecond = static_cast<time_t>(time_.microSecond() % TimeStamp::kMicroSecond2Second);
+    time_t seconds = static_cast<time_t>(time_.microSecond() / kMicroSecond2Second);
+    time_t microSecond = static_cast<time_t>(time_.microSecond() % kMicroSecond2Second);
 
     // 获得格式化的时间
     struct tm tm_time;

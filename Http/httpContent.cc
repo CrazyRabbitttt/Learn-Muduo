@@ -1,7 +1,7 @@
-#include "Learn-Muduo/Http/httpContent.h"
-#include "Learn-Muduo/Http/httpRequest.h"
-#include "Learn-Muduo/Http/httpResponse.h"
-#include "Learn-Muduo/Net/Buffer.h"
+#include "httpContent.h"
+#include "httpRequest.h"
+#include "httpResponse.h"
+#include "Buffer.h"
 
 using namespace bing;
 

@@ -1,9 +1,9 @@
 #ifndef BING_LOG_LOGFILE_H
 #define BING_LOG_LOGFILE_H
 
-#include "Learn-Muduo/Base/nocopyable.h"
-#include "Learn-Muduo/Base/Mutex.h"
-#include "Learn-Muduo/Base/TimeStamp.h"
+#include "nocopyable.h"
+#include "Mutex.h"
+#include "TimeStamp.h"
 
 #include <stdio.h>
 #include <memory>

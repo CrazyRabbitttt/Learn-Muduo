@@ -1,7 +1,7 @@
 #ifndef BING_LOG_LOGSTREAM_H
 #define BING_LOG_LOGSTREAM_H
 
-#include "Learn-Muduo/Base/nocopyable.h"
+#include "nocopyable.h"
 #include <algorithm>
 #include <string.h>     // memcpy 
 #include <string>

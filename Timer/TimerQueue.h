@@ -1,9 +1,9 @@
 #ifndef BING_TIMER_TIMERQUEUE_H_
 #define BING_TIMER_TIMERQUEUE_H_
 
-#include "Learn-Muduo/Timer/Timer.h"
-#include "Learn-Muduo/Base/nocopyable.h"
-#include "Learn-Muduo/Base/TimeStamp.h"
+#include "Timer.h"
+#include "nocopyable.h"
+#include "TimeStamp.h"
 
 #include <vector>
 #include <set>

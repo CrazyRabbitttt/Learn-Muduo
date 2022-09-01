@@ -1,5 +1,5 @@
-#include "Learn-Muduo/Base/Thread.h"
-#include "Learn-Muduo/Base/CurrentThread.h"
+#include "Thread.h"
+#include "CurrentThread.h"
 
 #include <semaphore.h>
 

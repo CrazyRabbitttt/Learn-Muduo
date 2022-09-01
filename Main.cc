@@ -1,10 +1,10 @@
-#include "Learn-Muduo/Net/EventLoop.h"
-#include "Learn-Muduo/Net/TcpServer.h"
-#include "Learn-Muduo/Net/InetAddress.h"
-#include "Learn-Muduo/Http/httpServer.h"
-#include "Learn-Muduo/Http/httpSourceFile.h"
-#include "Learn-Muduo/Log/asynclogging.h"
-#include "Learn-Muduo/Log/logger.h"
+#include "EventLoop.h"
+#include "TcpServer.h"
+#include "InetAddress.h"
+#include "httpServer.h"
+#include "httpSourceFile.h"
+#include "asynclogging.h"
+#include "logger.h"
 
 #include <memory>
 
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
         printf("Usage: %s portname [logpath]\n", argv[0]);
         return 0;
     } else if (argc == 2) {
-        printf("Use the default logPath as you dont setted it.\n");
+        printf("Use the default logPath as you didn't  set it.\n");
     } else if (argc == 3){
         printf("argv1:");
         std::cout << argv[1];

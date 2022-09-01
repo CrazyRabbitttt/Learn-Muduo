@@ -1,10 +1,10 @@
 #ifndef BING_NET_EVENTLOOP_H
 #define BING_NET_EVENTLOOP_H
 
-#include "Learn-Muduo/Base/Thread.h"
-#include "Learn-Muduo/Base/CurrentThread.h"
-#include "Learn-Muduo/Base/TimeStamp.h"
-#include "Learn-Muduo/Timer/TimerQueue.h"
+#include "Thread.h"
+#include "CurrentThread.h"
+#include "TimeStamp.h"
+#include "TimerQueue.h"
 
 #include <vector>
 
