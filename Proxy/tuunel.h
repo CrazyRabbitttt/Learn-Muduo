@@ -20,8 +20,8 @@ class Tunnel : public std::enable_shared_from_this<Tunnel> {
         : client_(loop, serverAddr, serverConn->name()),
           serverConn_(serverConn)
         {
-          LOG_INFO << "Tunnel " << serverConn_->peerAddress().toIpPort() << " <-> " 
-                   << serverAddr.toIpPort(); 
+          // LOG_INFO << "Tunnel " << serverConn_->peerAddress().toIpPort() << " <-> " 
+                  //  << serverAddr.toIpPort(); 
         }
       
    void setup() {
@@ -66,7 +66,6 @@ class Tunnel : public std::enable_shared_from_this<Tunnel> {
     void onClientConnection(const TcpConnectionPtr& conn) {
         using std::placeholders::_1;
         using std::placeholders::_2;
-        printf("Proxy同Server创建了连接\n");
         LOG_DEBUG << (conn->connected() ? "UP" : "DOWN");
         if (conn->connected()) {
           conn->setTcpNoDelay(true);      // nodelay 算法
@@ -79,13 +78,12 @@ class Tunnel : public std::enable_shared_from_this<Tunnel> {
           {
             conn->send(serverConn_->inputBuffer());
           }
-        } else {
-            // teardown
+        } else {                        // 如果说是BadRequest Or 短连接，关闭代理对应的连接
+            teardown();                 // 关闭掉连接
         }
     }
 
     void onClientMessage(const TcpConnectionPtr& conn, Buffer* buffer, muduo::Timestamp) {
-      printf("Proxy将从Server收到的信息传给client..\n");
       LOG_DEBUG << conn->name() << " " << buffer->readableBytes();
       if (serverConn_) {
         serverConn_->send(buffer);      // 收到了数据就发送给客户端
@@ -93,7 +91,6 @@ class Tunnel : public std::enable_shared_from_this<Tunnel> {
         buffer->retrieveAll();          // 没有连接了就读出来
         abort();
       }
-
     }
 
     TcpClient client_;                  // 客户端
