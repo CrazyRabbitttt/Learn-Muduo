@@ -51,7 +51,7 @@ class MutexLockGuard {
 };  
 
 
-//防止创建了临时对象就锁住了
+//防止创建了临时对象就锁住了, 匿名的临时对象是会被捕捉到的
 #define MutexLockGuard(x) static_assert(false, "missing  mutex guard var name, 只是创建了临时对象");
 }
 #endif

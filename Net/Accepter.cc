@@ -34,7 +34,7 @@ Accepter::Accepter(EventLoop* loop, const InetAddress& listenAddr, bool reusepor
         // acceptSocket_.setReusePort(true);
         acceptSocket_.bindAddr(listenAddr);     //socket bind the addr
 
-        //监听socket的回调函数就是handleRead, 加入this就是绑定对象的成员函数
+        //监听socket的回调函数就是handleRead, 加入this就是绑定对象的成员函数，如果说可读就触发
         acceptChannel_.setReadCallBack(std::bind(&Accepter::NewConnection, this));
     }
 
