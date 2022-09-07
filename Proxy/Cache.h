@@ -8,7 +8,8 @@
 // 双向链表中存储的属性等
 typedef struct _obj_t { 
     char flag;                      // judge if tear or front
-    char uri[100];
+    // char uri[100];
+    const char* uri;
     char respHeader[1024];
     char respBody[MAX_OBJECT_SIZE];
     int respHeaderLen;

@@ -14,7 +14,11 @@ InetAddress* g_serverAddr;
 EventLoop* g_eventLoop;
 std::map<std::string, TunnelPtr> g_tunnels;
 
-static const char http[8] = "HTTP/1.";
+static const char http[]       = "HTTP/1.";
+static const char resStatus[]  = "HTTP/1.0 200\r\n";
+static const char resConn[]    = "Connection: close\r\n";
+static const char rescrlf[]    = "\r\n"; 
+
 
 enum Method{ kGet, kOther};   
 enum Version {
@@ -33,9 +37,6 @@ static std::string query_;
 static Version version_;
 
 using namespace muduo;
-
-
-
 
 bool ParseRequestMethod(const char* start, const char* end) {
     string method(start, end); 
@@ -112,12 +113,10 @@ obj_t* readItem(const char* targetURI) {
 
     /********  reading section ************/
     obj_t* cur = cache.head->next;
-    printf("开始在cache中查找了\n");
     while (cur->flag != '@') {
-        printf("the uri in cache :%s\n", cur->uri);
         if (strcmp(targetURI, cur->uri) == 0) {
             return cur;
-        }
+        } 
         cur = cur->next;
     }
 
@@ -137,7 +136,6 @@ obj_t* readItem(const char* targetURI) {
 // 写模型，将obj写到cache中，可能饥饿
 void writeToCache(obj_t* obj) {
     // 如果current cap, if full, delete one 
-    printf("In write, bodylen:%d\n", obj->respBodyLen);
     while (obj->respBodyLen + CacheSize > MAX_CACHE_SIZE && cache.head->next != cache.tail) {
         obj_t* last = cache.tail->prev;
         last->next->prev = last->prev;
@@ -181,18 +179,20 @@ void onServerMessage(const TcpConnectionPtr& conn, Buffer* buffer, Timestamp) {
         const TcpConnectionPtr& clientConn = boost::any_cast<const TcpConnectionPtr&>(conn->getContext());
         // buffer 是接收的缓冲
         bool res = ParseRequest(buffer);
-        printf("after parse request\n");
         if (res) {              // 如果是合法的GET请求
-            printf("Parse uri:%s\n", path_.c_str());
             obj_t* obj = (obj_t*)malloc(sizeof(*obj));              // 线程私有？？可重入
             obj = readItem(path_.c_str());
             if (obj) {          // 如果是找到了缓存的内容
-                conn->send("Proxy中有缓存的内容, Url, 能够直接返还给客户端\n");
+                printf("Hit Cache, Return to Client\n");
+                // 发送Status, 
+                conn->send(resStatus);
+                conn->send(resConn);
+                conn->send(rescrlf);
+                conn->send(obj->respBody);
             } else {
-                printf("在Cache中没找到\n");
+                printf("在Cache中没找到, 向Server发起请求\n");
             }
             free(obj);
-            // printf("From Client Method:%d, Path:%s, Version:%d\n", method_, path_.c_str(), version_);
         }
         printf("send message to server\n");
         clientConn->send(buffer);                   // 将获得的client的数据传送到server 
@@ -206,7 +206,6 @@ int main(int argc, char** argv) {
         printf("Usage: %s <ip> <port> <listenport>\n", argv[0]);
         return 0;
     }
-
     const char* Ip = argv[1];                                      // Server Ip
     uint16_t port  = static_cast<uint16_t>(atoi(argv[2]));        // Server Port 
     InetAddress serverAddr(port, Ip);
@@ -239,9 +238,10 @@ int main(int argc, char** argv) {
     strcat(tmpobj->respHeader, header);
     tmpobj->respBodyLen += strlen(body);
     tmpobj->respHeaderLen += strlen(header);
-    strcat(tmpobj->uri, "/Test/index.html");
+    // strcat(tmpobj->uri, "/Test/index.html");
+    tmpobj->uri = "/";
     writeToCache(tmpobj);
-    free(tmpobj);
+    // free(tmpobj);
 //=====================================================================================================
     server.setConnectionCallback(onServerConnection);
     server.setMessageCallback(onServerMessage);
@@ -249,4 +249,5 @@ int main(int argc, char** argv) {
     server.start();
 
     loop.loop();
+    free(tmpobj);
 }
