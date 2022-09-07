@@ -15,10 +15,17 @@ EventLoop* g_eventLoop;
 std::map<std::string, TunnelPtr> g_tunnels;
 
 static const char http[]       = "HTTP/1.";
-static const char resStatus[]  = "HTTP/1.0 200\r\n";
+static const char resStatus[]  = "HTTP/1.0 200 OK\r\n";
 static const char resConn[]    = "Connection: close\r\n";
 static const char rescrlf[]    = "\r\n"; 
 
+static const char resError[]   = "HTTP/1.0 404 Not Found\r\n";
+
+// Buffer* tmpbuffer;
+// int cnt = 0;
+
+
+enum Parsestate { kParseRequest, kParseHeader, };
 
 enum Method{ kGet, kOther};   
 enum Version {
@@ -35,6 +42,7 @@ static Method method_;      // the httpMethod
 static std::string path_;                                  // urlpath
 static std::string query_;
 static Version version_;
+
 
 using namespace muduo;
 
@@ -89,16 +97,44 @@ bool ParseRequestLine(const char* start, const char* end) {
 }
 
 
-bool ParseRequest(Buffer* buffer) {
+int  ParseRequest(Buffer* buffer) {
+    printf("in parse request\n");
     bool parseOk  = true;                           // 解析一行的状态
-    const char* crlf = buffer->findCRLF();          // 第一个出现\r\n的位置
-    if (crlf) {
-        parseOk = ParseRequestLine(buffer->peek(), crlf);
-        if (parseOk) {
-            return true;
-        } 
-    } 
-    return false;
+    Parsestate parsestate = kParseRequest;
+    bool lineMore = true;
+    while (lineMore) {
+        if (parsestate == kParseRequest) {
+            printf("Parse request ...\n");
+            const char* crlf = buffer->findCRLF();
+            if (crlf) {
+                 const char* colon = std::find(buffer->peek(), crlf, ':');
+                 if (colon == crlf) {       // 空行
+                    lineMore = false;
+                    return 2;
+                 }
+                 parseOk = ParseRequestLine(buffer->peek(), crlf);      // 解析头部
+                 if (parseOk) {
+                    // parsestate = kParseHeader;
+                    lineMore = false;
+                 } else lineMore = false;
+            } else {
+                lineMore = false;        
+                parseOk = false;                 
+            }
+        } else if (parsestate == kParseHeader) {
+            printf("Parse header...\n");
+            const char* crlf = buffer->findCRLF();
+            if (crlf) {
+                const char* colon = std::find(buffer->peek(), crlf, ':');
+                if (colon == crlf) {                                    // 一定是会有空行的
+                    lineMore = false;
+                } 
+            } else {
+                lineMore = false;
+            }
+        }
+    }
+    return parseOk;
 }
 
 
@@ -173,13 +209,15 @@ void onServerConnection(const TcpConnectionPtr& conn) {
     }
 }
 
+
+
 // Proxy 接收到客户端的信息
 void onServerMessage(const TcpConnectionPtr& conn, Buffer* buffer, Timestamp) {
     if (!conn->getContext().empty()) {              // 也就是有连接？
         const TcpConnectionPtr& clientConn = boost::any_cast<const TcpConnectionPtr&>(conn->getContext());
         // buffer 是接收的缓冲
-        bool res = ParseRequest(buffer);
-        if (res) {              // 如果是合法的GET请求
+        int res = ParseRequest(buffer);
+        if (res == 1) {              // 如果是合法的GET请求
             obj_t* obj = (obj_t*)malloc(sizeof(*obj));              // 线程私有？？可重入
             obj = readItem(path_.c_str());
             if (obj) {          // 如果是找到了缓存的内容
@@ -189,15 +227,28 @@ void onServerMessage(const TcpConnectionPtr& conn, Buffer* buffer, Timestamp) {
                 conn->send(resConn);
                 conn->send(rescrlf);
                 conn->send(obj->respBody);
+                conn->shutdown();                                   // 关闭掉同客户端的连接
             } else {
                 printf("在Cache中没找到, 向Server发起请求\n");
+                clientConn->send(buffer);                   // 将获得的client的数据传送到server 
+                clientConn->send("\r\n");
+                printf("send message to server\n");
             }
             free(obj);
+            
+        } else if (res == 2){
+            // 读到了空行, 直接不管
+        } else {
+            printf("请求压根就不合法,直接返回错误得了\n");
+            conn->send(resError);
+            conn->send(resConn);
+            conn->send(rescrlf);
+            // conn->shutdown();
         }
-        printf("send message to server\n");
-        clientConn->send(buffer);                   // 将获得的client的数据传送到server 
-    }   
+    }
 }
+
+
 
 
 
@@ -239,7 +290,7 @@ int main(int argc, char** argv) {
     tmpobj->respBodyLen += strlen(body);
     tmpobj->respHeaderLen += strlen(header);
     // strcat(tmpobj->uri, "/Test/index.html");
-    tmpobj->uri = "/";
+    tmpobj->uri = "/haha";
     writeToCache(tmpobj);
     // free(tmpobj);
 //=====================================================================================================

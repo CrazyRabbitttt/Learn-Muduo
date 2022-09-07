@@ -46,7 +46,7 @@ class Tunnel : public std::enable_shared_from_this<Tunnel> {
       client_.disconnect();
    }
 
-   ~Tunnel() { LOG_INFO << "~Tunnel"; }
+   ~Tunnel() { /*LOG_INFO << "~Tunnel";*/ }
 
  private:
 
