@@ -102,19 +102,22 @@ int  ParseRequest(Buffer* buffer) {
     bool parseOk  = true;                           // 解析一行的状态
     Parsestate parsestate = kParseRequest;
     bool lineMore = true;
+    printf("%s", buffer->peek());
     while (lineMore) {
         if (parsestate == kParseRequest) {
-            printf("Parse request ...\n");
             const char* crlf = buffer->findCRLF();
             if (crlf) {
-                 const char* colon = std::find(buffer->peek(), crlf, ':');
+                 const char* colon = std::find(buffer->peek(), crlf, 'H');
                  if (colon == crlf) {       // 空行
                     lineMore = false;
+                    printf("读到空行了\n");
                     return 2;
                  }
                  parseOk = ParseRequestLine(buffer->peek(), crlf);      // 解析头部
                  if (parseOk) {
+                    printf("Parse line ok.\n");
                     // parsestate = kParseHeader;
+                    buffer->retrieveAll();
                     lineMore = false;
                  } else lineMore = false;
             } else {
@@ -140,22 +143,26 @@ int  ParseRequest(Buffer* buffer) {
 
 // 读模型， 从Cache进行访问, 从Cache中找有没有缓存的数据
 obj_t* readItem(const char* targetURI) {
+    printf("here3??\n");
     P(&mutex);
     readcnt++;                   // 读者的数量++
     if (readcnt == 1) {          // 第一个读者，拿写锁，不让写操作进行 
         P(&W);
     }   
     V(&mutex);
-
+    printf("here4??\n");
     /********  reading section ************/
     obj_t* cur = cache.head->next;
+    printf("here5??\n");
+    putchar(cur->flag);
     while (cur->flag != '@') {
+        printf("%s:%s", targetURI, cur->uri);
         if (strcmp(targetURI, cur->uri) == 0) {
             return cur;
         } 
         cur = cur->next;
     }
-
+    printf("here6??\n");
     /********  reading section ************/
 
     P(&mutex);
@@ -163,7 +170,8 @@ obj_t* readItem(const char* targetURI) {
     if (readcnt == 0) {         // 全部的读都没了，放开写锁
         V(&W);
     }
-    V(&mutex);
+    V(&mutex);  
+    printf("if is ok?\n");
 
     return nullptr;
 }
@@ -218,8 +226,15 @@ void onServerMessage(const TcpConnectionPtr& conn, Buffer* buffer, Timestamp) {
         // buffer 是接收的缓冲
         int res = ParseRequest(buffer);
         if (res == 1) {              // 如果是合法的GET请求
-            obj_t* obj = (obj_t*)malloc(sizeof(*obj));              // 线程私有？？可重入
+            // 不管，等到读了空格之后再处理
+            printf("解析完头部\n");
+        } else if (res == 2){
+            printf("here..\n");
+            // obj_t* obj = (obj_t*)malloc(sizeof(*obj));              // 线程私有？？可重入
+            obj_t* obj;
+            printf("here1...path : %s\n", path_.c_str());
             obj = readItem(path_.c_str());
+            printf("fix segment fault ?\n");
             if (obj) {          // 如果是找到了缓存的内容
                 printf("Hit Cache, Return to Client\n");
                 // 发送Status, 
@@ -229,15 +244,15 @@ void onServerMessage(const TcpConnectionPtr& conn, Buffer* buffer, Timestamp) {
                 conn->send(obj->respBody);
                 conn->shutdown();                                   // 关闭掉同客户端的连接
             } else {
-                printf("在Cache中没找到, 向Server发起请求\n");
-                clientConn->send(buffer);                   // 将获得的client的数据传送到server 
-                clientConn->send("\r\n");
+                printf("在Cache中没找到, 向Server发起请求:\n");
+                string tmp = "GET "; tmp += path_; 
+                if (version_ == kHttp10) tmp += " HTTP/1.0\r\n";
+                else tmp += " HTTP/1.1\r\n";
+                clientConn->send(tmp.c_str());
+                clientConn->send(rescrlf);
                 printf("send message to server\n");
             }
-            free(obj);
-            
-        } else if (res == 2){
-            // 读到了空行, 直接不管
+            // free(obj);
         } else {
             printf("请求压根就不合法,直接返回错误得了\n");
             conn->send(resError);

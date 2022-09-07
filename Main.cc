@@ -33,7 +33,9 @@ void HttpResponseCallBack(const HttpRequest& request, HttpResponse& response) {
         response.setBodyType("text/html");
         response.setBody(Website);
     } else {
-        printf("The Path is not /\n");
+        response.setStatusCode(k404NotFound);
+        response.setBodyType("text/html");
+        response.setBody("Not Found!!!!");
     }
 }
 
