@@ -18,6 +18,30 @@
 ●使用智能指针unique_ptr等管理指针，防止内存泄漏 
 
 
+### 同类项目的性能对比
+```sh
+root@iBing:~/Learn-Muduo/webbench# ./webbench -t 30 -c 5000 http://127.0.0.1:9090/
+Webbench - Simple Web Benchmark 1.5
+Copyright (c) Radim Kolar 1997-2004, GPL Open Source Software.
+
+Benchmarking: GET http://127.0.0.1:9090/
+5000 clients, running 30 sec.
+
+Speed=195020 pages/min, 6276329 bytes/sec.
+Requests: 97510 susceed, 0 failed.
+root@iBing:~/Learn-Muduo/webbench# ./webbench -t 30 -c 5000 http://127.0.0.1:9090/
+Webbench - Simple Web Benchmark 1.5
+Copyright (c) Radim Kolar 1997-2004, GPL Open Source Software.
+
+Benchmarking: GET http://127.0.0.1:9090/
+5000 clients, running 30 sec.
+
+Speed=169120 pages/min, 5561451 bytes/sec.
+Requests: 84435 susceed, 125 failed.
+```
+> 测试了几次，使用阿里云测试的，可能是由于网络问题测试有些偏差，但是可以看出性能是差不多的（有时比较好）
+
+
 ### 运行环境
 
 - Linux Version >= 2.6
