@@ -38,7 +38,7 @@ void Channel::remove() {
 
 
 //根据revent去调用不同的用户回调, 得到Epoller的通知进行处理
-void Channel::handleEvent(TimeStamp receiveTime) {      // 得到的是poll的return time 
+void Channel::handleEvent(TimeStamp receiveTime) {      // 得到的是poll的return time, epoll 不断的
     if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN)) {
         if (closeEventCallBack_) {
             closeEventCallBack_();

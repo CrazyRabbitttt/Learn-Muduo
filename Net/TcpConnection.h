@@ -43,7 +43,7 @@ public:
 
     void send(Buffer* buffer);
 
-    // 给到Server去填充
+    // 给到Server去填充x
     HttpContent* getHttpContent() {
         return &content_;
     }

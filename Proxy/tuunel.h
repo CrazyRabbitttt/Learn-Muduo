@@ -9,6 +9,7 @@
 #include "muduo/net/TcpServer.h"
 #include "muduo/base/Timestamp.h"
 
+
 using namespace muduo::net;
 using namespace muduo::detail;
 
@@ -84,7 +85,9 @@ class Tunnel : public std::enable_shared_from_this<Tunnel> {
     }
 
     void onClientMessage(const TcpConnectionPtr& conn, Buffer* buffer, muduo::Timestamp) {
+      printf("需要进行缓存下来\n");
       LOG_DEBUG << conn->name() << " " << buffer->readableBytes();
+
       if (serverConn_) {
         serverConn_->send(buffer);      // 收到了数据就发送给客户端
       } else {
@@ -93,6 +96,8 @@ class Tunnel : public std::enable_shared_from_this<Tunnel> {
       }
     }
 
+
+    // obj_t obj;
     TcpClient client_;                  // 客户端
     TcpConnectionPtr serverConn_;       // 作为Server的一个连接
     TcpConnectionPtr clientConn_;       // 作为Client的一个连接

@@ -102,7 +102,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr) {
 
     // 直接调用回调函数，建立连接
     // conn->connectEstablished();    
-    // 直接调用连接的建立
+    // 直接调用连接的建立, 这里就是本线程调用其他的线程的操作
     ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
 }
 

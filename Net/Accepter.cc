@@ -27,7 +27,7 @@ Accepter::Accepter(EventLoop* loop, const InetAddress& listenAddr, bool reusepor
         acceptChannel_.Init(loop, acceptSocket_.fd());      //放弃构造，使用init函数传递fd
         /*
             Accept进行连接的监听，如果有新用户进行了连接，进行用户
-            的回调。将connfd封装成Channel，唤醒subLoop进行处理
+            的回调。将connfd封装成Channel，唤醒subLoop进行处理, (runinloop?执行establish)
         */
 
         acceptSocket_.setReuseAddr(true);

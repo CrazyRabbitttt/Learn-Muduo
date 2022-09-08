@@ -29,7 +29,6 @@ public:
 IgnoreSigPipe initObj_;     //使用EventLoop的时候，全局对象初始化，SIGPIPE会被自动的进行初始化，忽略掉SIGPIPE
 
 
-
 //创建wakeupfd_,唤醒subReactor处理新的Channel
 int createEventfd() {
     int fd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);

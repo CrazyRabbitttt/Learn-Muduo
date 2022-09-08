@@ -226,15 +226,11 @@ void onServerMessage(const TcpConnectionPtr& conn, Buffer* buffer, Timestamp) {
         // buffer 是接收的缓冲
         int res = ParseRequest(buffer);
         if (res == 1) {              // 如果是合法的GET请求
-            // 不管，等到读了空格之后再处理
-            printf("解析完头部\n");
+            // 不管，等到读取到\r\n之后再一起处理，这时候已经将uri存储下来了
         } else if (res == 2){
-            printf("here..\n");
             // obj_t* obj = (obj_t*)malloc(sizeof(*obj));              // 线程私有？？可重入
             obj_t* obj;
-            printf("here1...path : %s\n", path_.c_str());
             obj = readItem(path_.c_str());
-            printf("fix segment fault ?\n");
             if (obj) {          // 如果是找到了缓存的内容
                 printf("Hit Cache, Return to Client\n");
                 // 发送Status, 
@@ -262,9 +258,6 @@ void onServerMessage(const TcpConnectionPtr& conn, Buffer* buffer, Timestamp) {
         }
     }
 }
-
-
-
 
 
 int main(int argc, char** argv) {
