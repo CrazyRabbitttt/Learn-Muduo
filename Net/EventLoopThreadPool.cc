@@ -25,7 +25,6 @@ void EventLoopThreadPool::start() {
         // 创建EventLoopThread
         EventLoopThread *t = new EventLoopThread();
         threads_.push_back(std::unique_ptr<EventLoopThread>(t));    // 放入threads_
-
         /*
             EventLoopThread会创建子线程，子线程创建EventLoop, 放入loops中
         */

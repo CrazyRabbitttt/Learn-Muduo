@@ -41,6 +41,10 @@ public:
     int events() const { return events_; }
     void set_revents(int revt) { revents_ = revt; }     //进行当前事件的设定
 
+    // 防止channel被手动remove掉，channel还在执行回调操作
+    void tie(const std::shared_ptr<void> &);
+
+
     //对于关注的事件的处理
     void enableReading()  { events_ |= kReadEvent; update();  }
     void disableReading() { events_ &= ~kReadEvent; update(); }
@@ -75,6 +79,10 @@ private:
     int events_;            //fd感兴趣的事件， bit pattern 
     int revents_;           //当前的事件
     int index_;             //used by poller， Epoller中的状态
+
+
+    std::weak_ptr<void> tie_;       // 多线程下共享对象的是否存活的问题
+    bool tied_; 
 
     //事件的回调，不同类型的回调函数
     EventCallBack writeEventCallBack_;

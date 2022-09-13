@@ -76,7 +76,7 @@ void EventLoop::loop() {
     while (!quit_) {
         activeChannels_.clear();
         pollReturnTime_ = poller_->poll(kPollTimeMs, &activeChannels_);       //获得事件的活动列表
-        // printf("the num of activechannels: %d\n", static_cast<int>(activeChannels_.size()));
+        // 获得了活跃的事件，放到activeChannels然后进行处理
         for (ChannelList::iterator it = activeChannels_.begin(); 
             it != activeChannels_.end(); ++it) 
         {

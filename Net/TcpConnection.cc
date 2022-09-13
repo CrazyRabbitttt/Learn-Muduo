@@ -25,7 +25,7 @@ TcpConnection::TcpConnection(EventLoop* loop,
       name_(nameArg),
       state_(kConnecting),
       socket_(new Socket(sockfd)),
-      channel_(new Channel(loop, sockfd)),
+      channel_(new Channel(loop, sockfd)),          // connfd, 回调函数是下面的函数
       localaddr_(localAddr),
       peeraddr_(peerAddr), 
       highWaterMark_(64 * 1024 * 1024),
@@ -45,7 +45,7 @@ TcpConnection::~TcpConnection() {
 void TcpConnection::connectEstablished() {
     setState(kConnected);
     channel_->enableReading();      //注册可读， socket
-    //调用Connectioncallback 
+    //调用Connectioncallback， 用户设置的conn callback 
     connectioncb_(shared_from_this());
 }
 
@@ -165,6 +165,7 @@ void TcpConnection::handleError() {
     }
     printf("TcpConnection::handleError name:%s - SO_ERROR:%d \n", name_.c_str(), err);
 }
+
 
 
 // 关闭连接

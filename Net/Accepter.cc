@@ -51,7 +51,7 @@ void Accepter::listen() {
     acceptChannel_.enableReading();     //监听读事件, 跟loop进行了链接了
 }
 
-//监听到了socket的连接了，进行accept 
+//监听到了socket的连接了，进行accept, 开始进行accept阻塞，建立了连接之后才accept
 void Accepter::NewConnection() {
 
     loop_->assertInLoopThread();
@@ -60,7 +60,7 @@ void Accepter::NewConnection() {
     int connfd = acceptSocket_.accept(&clientAddr); //accept后会填充对端的地址
     
     if (connfd >= 0) {      //连接创建成功了
-        //用户的回调函数
+        // 用户的回调函数
         if (newConnectioncb_) {
             newConnectioncb_(connfd, clientAddr);
         } else {

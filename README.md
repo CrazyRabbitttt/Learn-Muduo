@@ -20,6 +20,11 @@
 
 ### 同类项目的性能对比
 ```sh
+
+# 由于使用的是阿里云服务器测试，性能太低，就只用5000并发测试。
+# 但是变量唯一嘛，同其他开源高性能项目进行对比
+
+# 本项目在5000并发下的测试
 root@iBing:~/Learn-Muduo/webbench# ./webbench -t 30 -c 5000 http://127.0.0.1:9090/
 Webbench - Simple Web Benchmark 1.5
 Copyright (c) Radim Kolar 1997-2004, GPL Open Source Software.
@@ -29,6 +34,9 @@ Benchmarking: GET http://127.0.0.1:9090/
 
 Speed=195020 pages/min, 6276329 bytes/sec.
 Requests: 97510 susceed, 0 failed.
+=======================================================================================================================================
+
+# 其他项目的性能测试
 root@iBing:~/Learn-Muduo/webbench# ./webbench -t 30 -c 5000 http://127.0.0.1:9090/
 Webbench - Simple Web Benchmark 1.5
 Copyright (c) Radim Kolar 1997-2004, GPL Open Source Software.
@@ -39,7 +47,7 @@ Benchmarking: GET http://127.0.0.1:9090/
 Speed=169120 pages/min, 5561451 bytes/sec.
 Requests: 84435 susceed, 125 failed.
 ```
-> 测试了几次，使用阿里云测试的，可能是由于网络问题测试有些偏差，但是可以看出性能是差不多的（有时比较好）
+> 测试了几次，使用阿里云测试的，可能是由于网络问题测试有些偏差，结果有时候高有时候低一点，不过都差距不太大
 
 
 ### 运行环境

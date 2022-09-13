@@ -26,7 +26,7 @@ TcpServer::TcpServer(EventLoop* loop, const InetAddress& listenAddr, const std::
       started_(false),
       nextConnId_(1)
     {
-        //新的用户连接的时候执行newConnection的回调
+        //新的用户连接的时候执行newConnection的回调, 需要传两个参数过去，用std::bind进行封装，
         accepter_->setNewConnectioncallback(std::bind(&TcpServer::newConnection, this, std::placeholders::_1, std::placeholders::_2));
     }  
 
@@ -85,8 +85,8 @@ void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr) {
         printf("error : TcpServer::newConnection getlocaladdr error\n");
     }
 
-    InetAddress localAddr(local);       //sockfd
-    TcpConnectionPtr conn(new TcpConnection(
+    InetAddress localAddr(local);                            //sockfd
+    TcpConnectionPtr conn(new TcpConnection(                // shared_ptr ????
         ioLoop, connName, sockfd, localAddr, peerAddr       // 这里的loop传入的是轮询得到的EventLoop
     ));
 
